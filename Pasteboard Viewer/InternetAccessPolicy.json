@@ -1,0 +1,14 @@
+{
+	"ApplicationDescription": "Inspect the system pasteboards.",
+	"DeveloperName": "Sindre Sorhus",
+	"Website": "https://sindresorhus.com/pasteboard-viewer",
+	"Connections" : [
+		{
+			"Host" : "*.appcenter.ms",
+			"NetworkProtocol" : "TCP",
+			"Port" : "443",
+			"Purpose" : "Pasteboard Viewer sends crash reports to this server.",
+			"DenyConsequences" : "If you deny this connection, crash reports will not be sent and bugs might stay unfixed."
+		}
+	]
+}

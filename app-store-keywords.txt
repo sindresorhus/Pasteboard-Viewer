@@ -1,0 +1,1 @@
+clipboard,pasteboard,nspasteboard,copy,paste,view,watch,uti,text,rtf,image,types,swift,development
