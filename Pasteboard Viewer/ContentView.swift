@@ -29,7 +29,7 @@ struct ContentView: View {
 	}
 
 	private func setWindowTitle() {
-		AppDelegate.shared.window.title = selectedType.map { "\(App.name) — \($0.title)" } ?? App.name
+		AppDelegate.shared.window.title = selectedType?.title ?? App.name
 	}
 
 	var body: some View {
