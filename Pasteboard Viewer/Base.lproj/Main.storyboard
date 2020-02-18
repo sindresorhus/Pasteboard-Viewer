@@ -318,6 +318,12 @@
                                                 <action selector="arrangeInFront:" target="Ady-hI-5gd" id="DRN-fu-gQh"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Stay in Front" id="hnr-Bz-Gpm">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <binding destination="YW6-0m-xfE" name="value" keyPath="values.stayInFront" id="9YG-Kl-Bub"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -347,6 +353,7 @@
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Pasteboard_Viewer" customModuleProvider="target"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+                <userDefaultsController representsSharedInstance="YES" id="YW6-0m-xfE"/>
             </objects>
             <point key="canvasLocation" x="75" y="0.0"/>
         </scene>

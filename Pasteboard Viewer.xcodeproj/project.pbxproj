@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E31C294123FBE2FA00DF3442 /* Defaults */; };
+		E31C294423FBE32200DF3442 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C294323FBE32200DF3442 /* Constants.swift */; };
 		E3A7F1DD23F7DAD400CDF428 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DC23F7DAD400CDF428 /* AppDelegate.swift */; };
 		E3A7F1DF23F7DAD400CDF428 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DE23F7DAD400CDF428 /* ContentView.swift */; };
 		E3A7F1E123F7DAD700CDF428 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3A7F1E023F7DAD700CDF428 /* Assets.xcassets */; };
@@ -20,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E31C294323FBE32200DF3442 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pasteboard Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3A7F1DC23F7DAD400CDF428 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E3A7F1DE23F7DAD400CDF428 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -40,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */,
 				E3AC952B23F879A400EE128C /* AppCenter.framework in Frameworks */,
 				E3AC952D23F879A400EE128C /* AppCenterCrashes.framework in Frameworks */,
 			);
@@ -70,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				E3A7F1DC23F7DAD400CDF428 /* AppDelegate.swift */,
+				E31C294323FBE32200DF3442 /* Constants.swift */,
 				E3A7F1DE23F7DAD400CDF428 /* ContentView.swift */,
 				E3A7F21123F8498F00CDF428 /* PasteboardContentsView.swift */,
 				E3BB8DC523FBDBCE007A3849 /* Pasteboard.swift */,
@@ -117,6 +122,9 @@
 			dependencies = (
 			);
 			name = "Pasteboard Viewer";
+			packageProductDependencies = (
+				E31C294123FBE2FA00DF3442 /* Defaults */,
+			);
 			productName = "Pasteboard Viewer";
 			productReference = E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */;
 			productType = "com.apple.product-type.application";
@@ -145,6 +153,9 @@
 				Base,
 			);
 			mainGroup = E3A7F1D023F7DAD400CDF428;
+			packageReferences = (
+				E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */,
+			);
 			productRefGroup = E3A7F1DA23F7DAD400CDF428 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -199,6 +210,7 @@
 				E3BB8DC623FBDBCE007A3849 /* Pasteboard.swift in Sources */,
 				E3A7F1DF23F7DAD400CDF428 /* ContentView.swift in Sources */,
 				E3A7F1DD23F7DAD400CDF428 /* AppDelegate.swift in Sources */,
+				E31C294423FBE32200DF3442 /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -411,6 +423,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/Defaults";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E31C294123FBE2FA00DF3442 /* Defaults */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */;
+			productName = Defaults;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E3A7F1D123F7DAD400CDF428 /* Project object */;
 }

@@ -2,6 +2,7 @@ import Cocoa
 import SwiftUI
 import AppCenter
 import AppCenterCrashes
+import Defaults
 
 @NSApplicationMain
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -43,7 +44,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 		window.center()
 		window.setFrameAutosaveName("Main Window")
 		window.contentView = NSHostingView(rootView: contentView)
+
+		setUpEvents()
+
 		window.makeKeyAndOrderFront(nil)
+	}
+
+	func setUpEvents() {
+		Defaults.observe(.stayInFront) {
+			self.window.level = $0.newValue ? .floating : .normal
+		}
+			.tieToLifetime(of: self)
 	}
 
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
