@@ -4,4 +4,6 @@ This is a developer utility that lets you inspect the various system pasteboards
 
 You can make the window always stay in front by enabling “Stay in Front” in the “Window” menu.
 
+Use the up/down arrow keys to switch between the pasteboard items.
+
 Note that this is not a clipboard manager. If you're not a Mac developer, you probably don't want this app.

@@ -53,8 +53,9 @@ extension NSMenuItem {
 		static let onActionClosure = ObjectAssociation<ActionClosure>()
 	}
 
+	// The explicit naming here is to prevent conflicts since this method is exposed to Objective-C.
 	@objc
-	private func callClosureGifski(_ sender: NSMenuItem) {
+	private func callClosurePasteboardViewer(_ sender: NSMenuItem) {
 		onAction?(sender)
 	}
 
@@ -73,7 +74,7 @@ extension NSMenuItem {
 		get { AssociatedKeys.onActionClosure[self] }
 		set {
 			AssociatedKeys.onActionClosure[self] = newValue
-			action = #selector(callClosureGifski)
+			action = #selector(callClosurePasteboardViewer)
 			target = self
 		}
 	}
@@ -88,7 +89,7 @@ extension NSControl {
 	}
 
 	@objc
-	private func callClosureGifski(_ sender: NSControl) {
+	private func callClosurePasteboardViewer(_ sender: NSControl) {
 		onAction?(sender)
 	}
 
@@ -107,7 +108,7 @@ extension NSControl {
 		get { AssociatedKeys.onActionClosure[self] }
 		set {
 			AssociatedKeys.onActionClosure[self] = newValue
-			action = #selector(callClosureGifski)
+			action = #selector(callClosurePasteboardViewer)
 			target = self
 		}
 	}
@@ -607,5 +608,50 @@ extension NSPasteboard {
 		default:
 			return String(describing: self)
 		}
+	}
+}
+
+
+private struct ForceFocusView: NSViewRepresentable {
+	final class CocoaForceFocusView: NSView {
+		private var hasFocused = false
+
+		override func viewDidMoveToWindow() {
+			guard
+				!hasFocused,
+				let window = self.window
+			else {
+				return
+			}
+
+			DispatchQueue.main.async {
+				self.hasFocused = true
+				window.makeFirstResponder(self)
+			}
+		}
+	}
+
+	typealias NSViewType = CocoaForceFocusView
+
+	func makeNSView(context: Context) -> NSViewType { .init() }
+
+	func updateNSView(_ nsView: NSViewType, context: Context) {}
+}
+
+private struct ForceFocusModifier: ViewModifier {
+	func body(content: Content) -> some View {
+		content
+			.background(ForceFocusView())
+	}
+}
+
+extension View {
+	/**
+	Force the focus on a view once.
+
+	This can be useful as a workaround for SwiftUI's focus issues, for example, the sidebar not getting initial focus.
+	*/
+	func forceFocus() -> some View {
+		modifier(ForceFocusModifier())
 	}
 }

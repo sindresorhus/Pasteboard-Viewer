@@ -8,7 +8,7 @@ struct ContentView: View {
 	@State private var previousChangeCount: Int?
 
 	// This is a workaround for a SwiftUI bug where it crashes in NSOutlineView if you change from 16 to 15 elements in the list. We work around that by clearing the list first if the count changed.
-	@State var previousTypeCount = 0
+	@State private var previousTypeCount = 0
 	var types: [Pasteboard.PasteboardType] {
 		let types = self.selectedPasteboard.types
 
@@ -19,7 +19,7 @@ struct ContentView: View {
 		return types.count != previousTypeCount ? [] : types
 	}
 
-	func nilSelectedTypeIfNeeded() {
+	private func nilSelectedTypeIfNeeded() {
 		if selectedPasteboard.nsPasteboard.changeCount != previousChangeCount {
 			DispatchQueue.main.async {
 				self.previousChangeCount = self.selectedPasteboard.nsPasteboard.changeCount
@@ -28,7 +28,7 @@ struct ContentView: View {
 		}
 	}
 
-	func setWindowTitle() {
+	private func setWindowTitle() {
 		AppDelegate.shared.window.title = selectedType.map { "\(App.name) — \($0.title)" } ?? App.name
 	}
 
@@ -36,6 +36,7 @@ struct ContentView: View {
 		nilSelectedTypeIfNeeded()
 		setWindowTitle()
 
+		// TODO: Set the sidebar to not be collapsible when SwiftUI supports that.
 		return NavigationView {
 			VStack(alignment: .leading) {
 				EnumPicker(
@@ -56,11 +57,14 @@ struct ContentView: View {
 						Text($0.title)
 							.frame(maxWidth: .infinity, alignment: .leading)
 					}
+						// Works around the sidebar not getting focus at launch.
+						.forceFocus()
 				}
 					.listStyle(SidebarListStyle())
-					.frame(minWidth: 200)
 					.padding(.top, -22) // Workaround for SwiftUI bug.
 			}
+				// TODO: Make this `minWidth: 180` when SwiftUI is able to persist the sidebar size.
+				.frame(minWidth: 200, maxWidth: 300)
 			PasteboardContentsView(
 				pasteboard: self.selectedPasteboard,
 				type: self.selectedType
