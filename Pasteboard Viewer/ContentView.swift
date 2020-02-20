@@ -2,30 +2,27 @@ import SwiftUI
 import Combine
 
 struct ContentView: View {
-	@ViewTimer(interval: 0.5, tolerance: 0.3) private var timer
+	@ObservedObject private var pasteboardObservable = NSPasteboard.Observable(.general)
 	@State private var selectedPasteboard = Pasteboard.general
 	@State private var selectedType: Pasteboard.PasteboardType?
-	@State private var previousChangeCount: Int?
 
 	// This is a workaround for a SwiftUI bug where it crashes in NSOutlineView if you change from 16 to 15 elements in the list. We work around that by clearing the list first if the count changed.
-	@State private var previousTypeCount = 0
-	var types: [Pasteboard.PasteboardType] {
-		let types = self.selectedPasteboard.types
+	@State private var previousChangeCount = 0
+	private var types: [Pasteboard.PasteboardType] {
+		let changeCount = selectedPasteboard.nsPasteboard.changeCount
 
 		DispatchQueue.main.async {
-			self.previousTypeCount = types.count
-		}
-
-		return types.count != previousTypeCount ? [] : types
-	}
-
-	private func nilSelectedTypeIfNeeded() {
-		if selectedPasteboard.nsPasteboard.changeCount != previousChangeCount {
-			DispatchQueue.main.async {
-				self.previousChangeCount = self.selectedPasteboard.nsPasteboard.changeCount
+			if
+				self.selectedType == nil
+					|| (!self.selectedPasteboard.types.contains { $0 == self.selectedType }
+			) {
 				self.selectedType = self.selectedPasteboard.types.first
 			}
+
+			self.previousChangeCount = changeCount
 		}
+
+		return changeCount != previousChangeCount ? [] : selectedPasteboard.types
 	}
 
 	private func setWindowTitle() {
@@ -33,7 +30,6 @@ struct ContentView: View {
 	}
 
 	var body: some View {
-		nilSelectedTypeIfNeeded()
 		setWindowTitle()
 
 		// TODO: Set the sidebar to not be collapsible when SwiftUI supports that.
@@ -42,7 +38,8 @@ struct ContentView: View {
 				EnumPicker(
 					"",
 					enumCase: $selectedPasteboard.onChange { _ in
-						self.selectedType = nil
+						self.selectedType = self.selectedPasteboard.types.first
+						self.pasteboardObservable.pasteboard = self.selectedPasteboard.nsPasteboard
 					}
 				) { pasteboard, _ in
 					Text(pasteboard.nsPasteboard.presentableName)

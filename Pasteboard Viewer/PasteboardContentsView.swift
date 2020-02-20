@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct PasteboardContentsView: View {
+	// TODO: When using Swift 5.2, make this `@Lazy @ObservedObject` and remove the explicit init.
+	@ObservedObject private var pasteboardObservable: NSPasteboard.Observable
+
 	var pasteboard: Pasteboard
 	var type: Pasteboard.PasteboardType?
 
@@ -51,5 +54,11 @@ struct PasteboardContentsView: View {
 	var body: some View {
 		contents
 			.frame(maxWidth: .infinity, maxHeight: .infinity)
+	}
+
+	init(pasteboard: Pasteboard, type: Pasteboard.PasteboardType?) {
+		self.pasteboard = pasteboard
+		self.type = type
+		self.pasteboardObservable = NSPasteboard.Observable(pasteboard.nsPasteboard)
 	}
 }

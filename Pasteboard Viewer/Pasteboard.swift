@@ -10,12 +10,7 @@ enum Pasteboard: CaseIterable {
 	struct PasteboardType: Hashable, Identifiable {
 		let pasteboard: Pasteboard
 		let type: NSPasteboard.PasteboardType
-
-		// We make the pasteboard type globally unique.
-		var id: String {
-			"\(pasteboard.nsPasteboard.name.rawValue) - \(type.rawValue) - \(pasteboard.nsPasteboard.changeCount)"
-		}
-
+		var id: String { type.rawValue }
 		var title: String { type.rawValue }
 	}
 

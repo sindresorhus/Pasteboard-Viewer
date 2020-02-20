@@ -380,41 +380,6 @@ extension EnumPicker where Label == Text {
 
 
 /**
-Force a view to update on an interval.
-
-```
-struct ContentView: View {
-	@ViewTimer(interval: 1, tolerance: 0.5) private var timer
-
-	var body: some View { … }
-}
-```
-*/
-@propertyWrapper
-public struct ViewTimer: DynamicProperty {
-	private final class Observable: ObservableObject {
-		@Published var value = true
-	}
-
-	@ObservedObject private var observable = Observable()
-	private var cancellable: AnyCancellable?
-
-	public init(interval: TimeInterval, tolerance: TimeInterval? = nil) {
-		let observable = self.observable
-
-		self.cancellable = Timer
-			.publish(every: interval, tolerance: tolerance, on: .main, in: .common)
-			.autoconnect()
-			.sink { _ in
-				observable.value.toggle()
-			}
-	}
-
-	public var wrappedValue: Bool { false }
-}
-
-
-/**
 A scrollable and and optionally editable text view.
 
 - Note: This exist as the SwiftUI `TextField` is unusable for multiline purposes.
@@ -653,5 +618,42 @@ extension View {
 	*/
 	func forceFocus() -> some View {
 		modifier(ForceFocusModifier())
+	}
+}
+
+
+extension NSPasteboard {
+	/// Returns a publisher that emits when the pasteboard is changes.
+	var publisher: AnyPublisher<Void, Never> {
+		Timer.publish(every: 0.5, tolerance: 0.2, on: .main, in: .common)
+			.autoconnect()
+			.map { _ in self.changeCount }
+			.removeDuplicates()
+			.map { _ in }
+			.eraseToAnyPublisher()
+	}
+}
+
+extension NSPasteboard {
+	/// An observable object that emits updates when the given pasteboard changes.
+	final class Observable: ObservableObject {
+		private var cancellable: AnyCancellable?
+
+		@Published var pasteboard: NSPasteboard {
+			didSet {
+				start()
+			}
+		}
+
+		private func start() {
+			cancellable = pasteboard.publisher.sink { [weak self] in
+				self?.objectWillChange.send()
+			}
+		}
+
+		init(_ pasteboard: NSPasteboard) {
+			self.pasteboard = pasteboard
+			start()
+		}
 	}
 }
