@@ -50,12 +50,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 		window.makeKeyAndOrderFront(nil)
 	}
 
+	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+
 	func setUpEvents() {
 		Defaults.observe(.stayInFront) {
 			self.window.level = $0.newValue ? .floating : .normal
 		}
 			.tieToLifetime(of: self)
 	}
-
-	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 }

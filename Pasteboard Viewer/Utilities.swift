@@ -8,7 +8,7 @@ final class FeedbackMenuItem: NSMenuItem {
 		super.init(coder: decoder)
 
 		onAction = { _ in
-			Meta.openSubmitFeedbackPage()
+			App.openSendFeedbackPage()
 		}
 	}
 }
@@ -36,7 +36,7 @@ final class UrlMenuItem: NSMenuItem {
 
 
 final class ObjectAssociation<T: Any> {
-	subscript(index: Any) -> T? {
+	subscript(index: AnyObject) -> T? {
 		get {
 			objc_getAssociatedObject(index, Unmanaged.passUnretained(self).toOpaque()) as! T?
 		} set {
@@ -132,6 +132,22 @@ struct App {
 			return true
 		}
 	}()
+
+	static func openSendFeedbackPage() {
+		let metadata =
+			"""
+			\(App.name) \(App.versionWithBuild) - \(App.id)
+			macOS \(System.osVersion)
+			\(System.hardwareModel)
+			"""
+
+		let query: [String: String] = [
+			"product": App.name,
+			"metadata": metadata
+		]
+
+		URL(string: "https://sindresorhus.com/feedback/")!.addingDictionaryAsQuery(query).open()
+	}
 }
 
 
@@ -212,25 +228,6 @@ struct System {
 		sysctlbyname("hw.model", &model, &size, nil, 0)
 		return String(cString: model)
 	}()
-}
-
-
-struct Meta {
-	static func openSubmitFeedbackPage() {
-		let metadata =
-			"""
-			\(App.name) \(App.versionWithBuild) - \(App.id)
-			macOS \(System.osVersion)
-			\(System.hardwareModel)
-			"""
-
-		let query: [String: String] = [
-			"product": App.name,
-			"metadata": metadata
-		]
-
-		URL(string: "https://sindresorhus.com/feedback/")!.addingDictionaryAsQuery(query).open()
-	}
 }
 
 
@@ -341,26 +338,26 @@ struct ContentView: View {
 }
 ```
 */
-struct EnumPicker<EnumCase, Label, Content>: View where EnumCase: CaseIterable & Equatable, EnumCase.AllCases.Index == Int, Label: View, Content: View {
-	private let enumCase: Binding<EnumCase>
+struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatable, Enum.AllCases.Index == Int, Label: View, Content: View {
+	private let enumBinding: Binding<Enum>
 	private let label: Label
-	private let content: (EnumCase, Bool) -> Content
+	private let content: (Enum, Bool) -> Content
 
 	var body: some View {
-		Picker(selection: enumCase.caseIndex, label: label) {
-			ForEach(Array(EnumCase.allCases).indexed(), id: \.0) { index, element in
-				self.content(element, element == self.enumCase.wrappedValue)
+		Picker(selection: enumBinding.caseIndex, label: label) {
+			ForEach(Array(Enum.allCases).indexed(), id: \.0) { index, element in
+				self.content(element, element == self.enumBinding.wrappedValue)
 					.tag(index)
 			}
 		}
 	}
 
 	init(
-		enumCase: Binding<EnumCase>,
+		enumBinding: Binding<Enum>,
 		label: Label,
-		@ViewBuilder content: @escaping (EnumCase, Bool) -> Content
+		@ViewBuilder content: @escaping (Enum, Bool) -> Content
 	) {
-		self.enumCase = enumCase
+		self.enumBinding = enumBinding
 		self.label = label
 		self.content = content
 	}
@@ -369,10 +366,10 @@ struct EnumPicker<EnumCase, Label, Content>: View where EnumCase: CaseIterable &
 extension EnumPicker where Label == Text {
 	init<S>(
 		_ title: S,
-		enumCase: Binding<EnumCase>,
-		@ViewBuilder content: @escaping (EnumCase, Bool) -> Content
+		enumBinding: Binding<Enum>,
+		@ViewBuilder content: @escaping (Enum, Bool) -> Content
 	) where S: StringProtocol {
-		self.enumCase = enumCase
+		self.enumBinding = enumBinding
 		self.label = Text(title)
 		self.content = content
 	}
@@ -431,8 +428,6 @@ struct ScrollableTextView: NSViewRepresentable {
 
 	func makeNSView(context: Context) -> NSViewType {
 		let scrollView = NSTextView.scrollableTextView()
-		scrollView.borderType = .bezelBorder
-		scrollView.drawsBackground = false
 
 		let textView = scrollView.documentView as! NSTextView
 		textView.delegate = context.coordinator
@@ -474,8 +469,6 @@ struct ScrollableAttributedTextView: NSViewRepresentable {
 
 	func makeNSView(context: Context) -> NSViewType {
 		let scrollView = NSTextView.scrollableTextView()
-		scrollView.borderType = .bezelBorder
-		scrollView.drawsBackground = false
 
 		let textView = scrollView.documentView as! NSTextView
 		textView.drawsBackground = false

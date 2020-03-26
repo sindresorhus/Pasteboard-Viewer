@@ -37,7 +37,7 @@ struct ContentView: View {
 			VStack(alignment: .leading) {
 				EnumPicker(
 					"",
-					enumCase: $selectedPasteboard.onChange { _ in
+					enumBinding: $selectedPasteboard.onChange { _ in
 						self.selectedType = self.selectedPasteboard.types.first
 						self.pasteboardObservable.pasteboard = self.selectedPasteboard.nsPasteboard
 					}
