@@ -11,7 +11,7 @@
 	<br>
 </div>
 
-This is a developer utility that lets you inspect the various system pasteboards. This can be useful to ensure your app is putting the correct data on [NSPasteboard](https://developer.apple.com/documentation/appkit/nspasteboard). The app refreshes the pasteboard contents live and can preview text, RTF, and images.
+This is a developer utility that lets you inspect the various system pasteboards. This can be useful to ensure your app is putting the correct data on [NSPasteboard](https://developer.apple.com/documentation/appkit/nspasteboard). The app refreshes the pasteboard contents live and can preview text, RTF, images, and anything that has a Quick Look preview.
 
 Note that this is not a clipboard manager. If you're not a Mac developer, you probably don't want this app.
 

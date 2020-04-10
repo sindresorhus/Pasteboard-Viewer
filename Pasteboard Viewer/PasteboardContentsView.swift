@@ -38,9 +38,26 @@ struct PasteboardContentsView: View {
 				.eraseToAnyView()
 		}
 
-		if let string = (pasteboard.nsPasteboard.string(forType: type) ?? data.map { String(describing: $0) }) {
+		if let string = pasteboard.nsPasteboard.string(forType: type) {
 			return ScrollableTextView(
 				text: .constant(string),
+				borderType: .noBorder
+			)
+				.eraseToAnyView()
+		}
+
+		if
+			let data = data,
+			let view = QuickLookPreview(data: data, typeIdentifier: type.rawValue)
+		{
+			return view
+				.background(Color(NSColor.textBackgroundColor))
+				.eraseToAnyView()
+		}
+
+		if let data = data {
+			return ScrollableTextView(
+				text: .constant(String(describing: data)),
 				borderType: .noBorder
 			)
 				.eraseToAnyView()

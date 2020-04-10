@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import Quartz
 
 
 /// Subclass this in Interface Builder with the title "Send Feedback…".
@@ -648,5 +649,70 @@ extension NSPasteboard {
 			self.pasteboard = pasteboard
 			start()
 		}
+	}
+}
+
+
+extension URL {
+	/**
+	Returns the type identifier for a file extension.
+
+	```
+	URL.fileExtensionForTypeIdentifier("public.png")
+	//=> "png"
+	```
+	*/
+	static func fileExtensionForTypeIdentifier(_ typeIdentifier: String) -> String? {
+		UTTypeCopyPreferredTagWithClass(typeIdentifier as CFString, kUTTagClassFilenameExtension)?.takeRetainedValue() as String?
+	}
+}
+
+
+struct QuickLookPreview: NSViewRepresentable {
+	typealias NSViewType = QLPreviewView
+
+	/// The item to preview.
+	let previewItem: QLPreviewItem
+
+	func makeNSView(context: Context) -> NSViewType { .init() }
+
+	func updateNSView(_ nsView: NSViewType, context: Context) {
+		nsView.previewItem = previewItem
+	}
+}
+
+extension QuickLookPreview {
+	/// - Note: The initializer will return `nil` if the URL is not a file URL.
+	init?(url: URL) {
+		guard url.isFileURL else {
+			return nil
+		}
+
+		previewItem = url as NSURL
+	}
+}
+
+extension QuickLookPreview {
+	init?(data: Data, typeIdentifier: String) {
+		guard let temporaryDirectory = try? FileManager.default.url(
+			for: .itemReplacementDirectory,
+			in: .userDomainMask,
+			appropriateFor: FileManager.default.homeDirectoryForCurrentUser,
+			create: true
+		) else {
+			return nil
+		}
+
+		let fileExtension = URL.fileExtensionForTypeIdentifier(typeIdentifier) ?? "txt"
+
+		let url = temporaryDirectory
+			.appendingPathComponent("data")
+			.appendingPathExtension(fileExtension)
+
+		guard (try? data.write(to: url)) != nil else {
+			return nil
+		}
+
+		self.init(url: url)
 	}
 }
