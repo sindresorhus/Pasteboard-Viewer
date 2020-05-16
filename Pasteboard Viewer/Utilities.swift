@@ -738,9 +738,3 @@ extension QuickLookPreview {
 		self.init(url: url)
 	}
 }
-
-struct Utilities_Previews: PreviewProvider {
-	static var previews: some View {
-		/*@START_MENU_TOKEN@*/Text("Hello, World!")/*@END_MENU_TOKEN@*/
-	}
-}
