@@ -511,6 +511,28 @@ extension View {
 	func eraseToAnyView() -> AnyView {
 		AnyView(self)
 	}
+	
+	func saveTofile(selectedType: Pasteboard.PasteboardType?) -> Void {
+		guard AppDelegate.shared.window != nil else { return  }
+		guard let fileName: String = selectedType?.title else { return }
+		guard let pasteboard: Pasteboard = selectedType?.pasteboard else { return}
+		guard let fileType: NSPasteboard.PasteboardType = selectedType?.type else { return }
+		
+		let panel = NSSavePanel()
+		panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+		panel.nameFieldStringValue = fileName
+		panel.beginSheetModal(for: AppDelegate.shared.window){ (result) in
+			if result.rawValue == NSApplication.ModalResponse.OK.rawValue,
+			let url = panel.url {
+			do {
+				try pasteboard.nsPasteboard.data(forType: fileType)?.write(to: url)
+			} catch {
+				print("Unable to save file")
+				print(error.localizedDescription)
+			}
+		  }
+		}
+	}
 }
 
 
@@ -714,5 +736,11 @@ extension QuickLookPreview {
 		}
 
 		self.init(url: url)
+	}
+}
+
+struct Utilities_Previews: PreviewProvider {
+	static var previews: some View {
+		/*@START_MENU_TOKEN@*/Text("Hello, World!")/*@END_MENU_TOKEN@*/
 	}
 }

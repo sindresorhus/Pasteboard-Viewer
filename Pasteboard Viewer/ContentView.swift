@@ -46,6 +46,7 @@ struct ContentView: View {
 				}
 					.labelsHidden()
 					.padding()
+				Button("Save to a file", action:{self.saveTofile(selectedType: self.selectedType)}).padding()
 				List(selection: $selectedType) {
 					// The `Divider` is a workaround for SwiftUI bug where the selection highlight for the first element in the list would dissapear in some cases when the view is updated, for example, when you copy something new to the pasteboard.
 					Divider()
