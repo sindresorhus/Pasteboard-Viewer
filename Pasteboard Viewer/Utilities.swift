@@ -36,6 +36,16 @@ final class UrlMenuItem: NSMenuItem {
 }
 
 
+final class SaveMenuItem: NSMenuItem {
+	required init(coder decoder: NSCoder) {
+		super.init(coder: decoder)
+		onAction = { _ in
+			self.saveTofile()
+		}
+	}
+}
+
+
 final class ObjectAssociation<T: Any> {
 	subscript(index: AnyObject) -> T? {
 		get {
@@ -77,6 +87,24 @@ extension NSMenuItem {
 			AssociatedKeys.onActionClosure[self] = newValue
 			action = #selector(callClosurePasteboardViewer)
 			target = self
+		}
+	}
+
+	func saveTofile() -> Void {
+		guard AppDelegate.shared.window != nil else { return  }
+		guard let selectedType: Pasteboard.PasteboardType = AppDelegate.shared.selectedType else { return }
+
+		let panel = NSSavePanel()
+		panel.nameFieldStringValue = selectedType.title
+		panel.beginSheetModal(for: AppDelegate.shared.window){ (result) in
+			if result.rawValue == NSApplication.ModalResponse.OK.rawValue,
+			let url = panel.url {
+			do {
+				try selectedType.pasteboard.nsPasteboard.data(forType: selectedType.type)?.write(to: url)
+			} catch {
+				AppDelegate.shared.window.presentError(error)
+				}
+			}
 		}
 	}
 }
@@ -510,28 +538,6 @@ extension View {
 	/// - Important: Use `Group` instead whenever possible!
 	func eraseToAnyView() -> AnyView {
 		AnyView(self)
-	}
-	
-	func saveTofile(selectedType: Pasteboard.PasteboardType?) -> Void {
-		guard AppDelegate.shared.window != nil else { return  }
-		guard let fileName: String = selectedType?.title else { return }
-		guard let pasteboard: Pasteboard = selectedType?.pasteboard else { return}
-		guard let fileType: NSPasteboard.PasteboardType = selectedType?.type else { return }
-		
-		let panel = NSSavePanel()
-		panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
-		panel.nameFieldStringValue = fileName
-		panel.beginSheetModal(for: AppDelegate.shared.window){ (result) in
-			if result.rawValue == NSApplication.ModalResponse.OK.rawValue,
-			let url = panel.url {
-			do {
-				try pasteboard.nsPasteboard.data(forType: fileType)?.write(to: url)
-			} catch {
-				print("Unable to save file")
-				print(error.localizedDescription)
-			}
-		  }
-		}
 	}
 }
 

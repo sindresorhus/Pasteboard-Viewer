@@ -7,6 +7,7 @@ import Defaults
 @NSApplicationMain
 final class AppDelegate: NSObject, NSApplicationDelegate {
 	var window: NSWindow!
+	var selectedType: Pasteboard.PasteboardType?
 
 	func applicationWillFinishLaunching(_ notification: Notification) {
 		UserDefaults.standard.register(

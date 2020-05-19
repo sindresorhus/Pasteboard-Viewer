@@ -4,7 +4,7 @@ import Combine
 struct ContentView: View {
 	@ObservedObject private var pasteboardObservable = NSPasteboard.Observable(.general)
 	@State private var selectedPasteboard = Pasteboard.general
-	@State private var selectedType: Pasteboard.PasteboardType?
+	@State public var selectedType: Pasteboard.PasteboardType?
 
 	// This is a workaround for a SwiftUI bug where it crashes in NSOutlineView if you change from 16 to 15 elements in the list. We work around that by clearing the list first if the count changed.
 	@State private var previousChangeCount = 0
@@ -28,9 +28,14 @@ struct ContentView: View {
 	private func setWindowTitle() {
 		AppDelegate.shared.window.title = selectedType?.title ?? App.name
 	}
+	
+	private func shareSelectedtype() {
+		AppDelegate.shared.selectedType = selectedType
+	}
 
 	var body: some View {
 		setWindowTitle()
+		shareSelectedtype()
 
 		// TODO: Set the sidebar to not be collapsible when SwiftUI supports that.
 		return NavigationView {
@@ -46,7 +51,6 @@ struct ContentView: View {
 				}
 					.labelsHidden()
 					.padding()
-				Button("Save to a file", action:{self.saveTofile(selectedType: self.selectedType)}).padding()
 				List(selection: $selectedType) {
 					// The `Divider` is a workaround for SwiftUI bug where the selection highlight for the first element in the list would dissapear in some cases when the view is updated, for example, when you copy something new to the pasteboard.
 					Divider()
