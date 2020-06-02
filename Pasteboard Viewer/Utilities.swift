@@ -147,7 +147,7 @@ struct App {
 			"metadata": metadata
 		]
 
-		URL(string: "https://sindresorhus.com/feedback/")!.addingDictionaryAsQuery(query).open()
+		URL("https://sindresorhus.com/feedback/").addingDictionaryAsQuery(query).open()
 	}
 }
 
@@ -714,5 +714,33 @@ extension QuickLookPreview {
 		}
 
 		self.init(url: url)
+	}
+}
+
+
+extension URL: ExpressibleByStringLiteral {
+	/**
+	Example:
+
+	```
+	let url: URL = "https://sindresorhus.com"
+	```
+	*/
+	public init(stringLiteral value: StaticString) {
+		self.init(string: "\(value)")!
+	}
+}
+
+
+extension URL {
+	/**
+	Example:
+
+	```
+	URL("https://sindresorhus.com")
+	```
+	*/
+	init(_ staticString: StaticString) {
+		self.init(string: "\(staticString)")!
 	}
 }
