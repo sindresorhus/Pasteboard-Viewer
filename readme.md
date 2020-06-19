@@ -21,6 +21,8 @@ Use the up/down arrow keys to switch between the pasteboard items.
 
 It hides obsolete system pasteboard types that have modern equivalents. This includes `CorePasteboardFlavorType`, `NSStringPboardType`, `NSFilenamesPboardType`, etc.
 
+Tip: Right-click an item in the sidebar to copy the type identifier.
+
 ## Download
 
 [![](https://linkmaker.itunes.apple.com/assets/shared/badges/en-us/macappstore-lrg.svg)](https://apps.apple.com/app/id1499215709?mt=12)

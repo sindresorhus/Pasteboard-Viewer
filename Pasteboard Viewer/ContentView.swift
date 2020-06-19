@@ -50,9 +50,15 @@ struct ContentView: View {
 					// The `Divider` is a workaround for SwiftUI bug where the selection highlight for the first element in the list would dissapear in some cases when the view is updated, for example, when you copy something new to the pasteboard.
 					Divider()
 						.opacity(0)
-					ForEach(types, id: \.self) {
-						Text($0.title)
+					ForEach(types, id: \.self) { type in
+						Text(type.title)
 							.frame(maxWidth: .infinity, alignment: .leading)
+							.contextMenu {
+								Button("Copy Type Identifier") {
+									// TODO: Pause realtime pasteboard view here when we support that.
+									type.id.copyToPasteboard()
+								}
+							}
 					}
 						// Works around the sidebar not getting focus at launch.
 						.forceFocus()

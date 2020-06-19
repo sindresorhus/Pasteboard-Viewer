@@ -9,3 +9,5 @@ You can make the window always stay in front by enabling “Stay in Front” in 
 Use the up/down arrow keys to switch between the pasteboard items.
 
 It hides obsolete system pasteboard types that have modern equivalents. This includes `CorePasteboardFlavorType`, `NSStringPboardType`, `NSFilenamesPboardType`, etc.
+
+Tip: Right-click an item in the sidebar to copy the type identifier.

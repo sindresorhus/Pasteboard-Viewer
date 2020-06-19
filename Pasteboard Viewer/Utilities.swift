@@ -744,3 +744,11 @@ extension URL {
 		self.init(string: "\(staticString)")!
 	}
 }
+
+
+extension String {
+	func copyToPasteboard() {
+		NSPasteboard.general.clearContents()
+		NSPasteboard.general.setString(self, forType: .string)
+	}
+}
