@@ -455,7 +455,7 @@ struct ScrollableTextView: NSViewRepresentable {
 
 		if let lineLimit = context.environment.lineLimit {
 			textView.textContainer?.maximumNumberOfLines = lineLimit
-        }
+		}
 	}
 }
 
@@ -500,7 +500,7 @@ struct ScrollableAttributedTextView: NSViewRepresentable {
 
 		if let lineLimit = context.environment.lineLimit {
 			textView.textContainer?.maximumNumberOfLines = lineLimit
-        }
+		}
 	}
 }
 
@@ -616,20 +616,164 @@ extension View {
 }
 
 
+extension BinaryInteger {
+	var boolValue: Bool { self != 0 }
+}
+
+
+/// Static representation of a window.
+/// - Note: The `name` property is always `nil` on macOS 10.15 and later unless you request “Screen Recording” permission.
+struct Window {
+	struct Owner {
+		let name: String
+		let processIdentifier: Int
+		let bundleIdentifier: String?
+		let app: NSRunningApplication?
+	}
+
+	// Most of these keys are guaranteed to exist: https://developer.apple.com/documentation/coregraphics/quartz_window_services/required_window_list_keys
+
+	let identifier: CGWindowID
+	let name: String?
+	let owner: Owner
+	let bounds: CGRect
+	let layer: Int
+	let alpha: Double
+	let memoryUsage: Int
+	let sharingState: CGWindowSharingType // https://stackoverflow.com/questions/27695742/what-does-kcgwindowsharingstate-actually-do
+	let isOnScreen: Bool
+
+	/// Accepts a window dictionary coming from `CGWindowListCopyWindowInfo`.
+	private init(windowDictionary window: [String: Any]) {
+		self.identifier = window[kCGWindowNumber as String] as! CGWindowID
+		self.name = window[kCGWindowName as String] as? String
+
+		let processIdentifier = window[kCGWindowOwnerPID as String] as! Int
+		let app = NSRunningApplication(processIdentifier: pid_t(processIdentifier))
+		self.owner = Owner(
+			name: window[kCGWindowOwnerName as String] as! String,
+			processIdentifier: processIdentifier,
+			bundleIdentifier: app?.bundleIdentifier,
+			app: app
+		)
+
+		self.bounds = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
+		self.layer = window[kCGWindowLayer as String] as! Int
+		self.alpha = window[kCGWindowAlpha as String] as! Double
+		self.memoryUsage = window[kCGWindowMemoryUsage as String] as? Int ?? 0
+		self.sharingState = CGWindowSharingType(rawValue: window[kCGWindowSharingState as String] as! UInt32)!
+		self.isOnScreen = (window[kCGWindowIsOnscreen as String] as? Int)?.boolValue ?? false
+	}
+}
+
+extension Window {
+	typealias Filter = (Self) -> Bool
+
+	/// Filters out fully transparent windows and windows smaller than 50 width or height.
+	static func defaultFilter(window: Self) -> Bool {
+		let minimumWindowSize: CGFloat = 50
+
+		// Skip windows outside the expected level range.
+		guard
+			window.layer < NSWindow.Level.screenSaver.rawValue,
+			window.layer >= NSWindow.Level.normal.rawValue
+		else {
+			return false
+		}
+
+		// Skip fully transparent windows, like with Chrome.
+		guard window.alpha > 0 else {
+			return false
+		}
+
+		// Skip tiny windows, like the Chrome link hover statusbar.
+		guard
+			window.bounds.width >= minimumWindowSize,
+			window.bounds.height >= minimumWindowSize
+		else {
+			return false
+		}
+
+		return true
+	}
+
+	static func allWindows(
+		options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements],
+		filter: Filter = defaultFilter
+	) -> [Self] {
+		let info = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] ?? []
+		return info.map { self.init(windowDictionary: $0) }.filter(filter)
+	}
+
+	/**
+	Returns the bundle identifier of the app that owns the frontmost window.
+
+	This method returns more correct results than `NSWorkspace.shared.frontmostApplication?.bundleIdentifier`. For example, the latter cannot correctly detect the 1Password Mini window.
+	*/
+	static func appBundleIdentifierForFrontmostWindow() -> String? {
+		allWindows().lazy.compactMap { $0.owner.bundleIdentifier }.first ?? NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+	}
+}
+
+
+extension NSPasteboard.PasteboardType {
+	/**
+	Convention for getting the bundle identifier of the source app.
+
+	> This marker’s presence indicates that the source of the content is the application with the bundle identifier matching its UTF–8 string content. For example: `pasteboard.setString("com.sindresorhus.Foo" forType: "org.nspasteboard.source")`. This is useful when the source is not the foreground application. This is meant to be shown to the user by a supporting app for informational purposes only. Note that an empty string is a valid value as explained below.
+	> - http://nspasteboard.org
+	*/
+	static let sourceAppBundleIdentifier = Self("org.nspasteboard.source")
+}
+
 extension NSPasteboard {
-	/// Returns a publisher that emits when the pasteboard is changes.
-	var publisher: AnyPublisher<Void, Never> {
-		Timer.publish(every: 0.5, tolerance: 0.2, on: .main, in: .common)
+	/// Information about the pasteboard contents.
+	struct ContentsInfo: Identifiable {
+		let id = UUID()
+
+		/// The date when the current pasteboard data was added.
+		let created = Date()
+
+		/// The bundle identifier of the app that put the data on the pasteboard.
+		let sourceAppBundleIdentifier: String?
+	}
+
+	/// Returns a publisher that emits when the pasteboard changes.
+	var publisher: AnyPublisher<ContentsInfo, Never> {
+		var isFirst = true
+
+		return Timer.publish(every: 0.2, tolerance: 0.1, on: .main, in: .common)
 			.autoconnect()
-			.map { _ in self.changeCount }
+			.prepend([Date()]) // We want the publisher to also emit immediately when someone subscribes.
+			.compactMap { [weak self] _ in
+				self?.changeCount
+			}
 			.removeDuplicates()
-			.map { _ in }
+			.compactMap { [weak self] _ -> ContentsInfo? in
+				defer {
+					if isFirst {
+						isFirst = false
+					}
+				}
+
+				guard
+					let self = self,
+					let source = self.string(forType: .sourceAppBundleIdentifier)
+				else {
+					// We ignore the first event in this case as we cannot know if the existing pasteboard contents came from the frontmost app.
+					return isFirst ? nil : ContentsInfo(sourceAppBundleIdentifier: Window.appBundleIdentifierForFrontmostWindow())
+				}
+
+				// An empty string has special behavior ( http://nspasteboard.org ).
+				// > In case the original source of the content is not known, set `org.nspasteboard.source` to the empty string.
+				return ContentsInfo(sourceAppBundleIdentifier: source.isEmpty ? nil : source)
+			}
 			.eraseToAnyPublisher()
 	}
 }
 
 extension NSPasteboard {
-	/// An observable object that emits updates when the given pasteboard changes.
+	/// An observable object that publishes updates when the given pasteboard changes.
 	final class Observable: ObservableObject {
 		private var cancellable: AnyCancellable?
 
@@ -639,9 +783,16 @@ extension NSPasteboard {
 			}
 		}
 
+		@Published var info: ContentsInfo?
+
 		private func start() {
 			cancellable = pasteboard.publisher.sink { [weak self] in
-				self?.objectWillChange.send()
+				guard let self = self else {
+					return
+				}
+
+				self.info = $0
+				self.objectWillChange.send()
 			}
 		}
 
@@ -688,7 +839,7 @@ extension QuickLookPreview {
 			return nil
 		}
 
-		previewItem = url as NSURL
+		self.previewItem = url as NSURL
 	}
 }
 
@@ -750,5 +901,57 @@ extension String {
 	func copyToPasteboard() {
 		NSPasteboard.general.clearContents()
 		NSPasteboard.general.setString(self, forType: .string)
+		NSPasteboard.general.setString(App.id, forType: .sourceAppBundleIdentifier)
+	}
+}
+
+
+/// Icon for a file/directory/bundle at the given URL.
+struct URLIcon: View {
+	let url: URL
+
+	var body: some View {
+		Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
+			.renderingMode(.original)
+			.resizable()
+			.aspectRatio(contentMode: .fit)
+	}
+}
+
+
+extension Bundle {
+	private func string(forInfoDictionaryKey key: String) -> String? {
+		// `object(forInfoDictionaryKey:)` prefers localized info dictionary over the regular one automatically
+		object(forInfoDictionaryKey: key) as? String
+	}
+
+	var name: String {
+		string(forInfoDictionaryKey: "CFBundleDisplayName")
+			?? string(forInfoDictionaryKey: "CFBundleName")
+			?? string(forInfoDictionaryKey: "CFBundleExecutable")
+			?? bundleIdentifier
+			?? ProcessInfo.processInfo.processName
+	}
+}
+
+
+extension NSWorkspace {
+	/**
+	Get an app name from an app bundle identifier.
+
+	```
+	NSWorkspace.shared.appName(forBundleIdentifier: "com.sindresorhus.Lungo")
+	//=> "Lungo"
+	```
+	*/
+	func appName(forBundleIdentifier bundleIdentifier: String) -> String? {
+		guard
+			let url = urlForApplication(withBundleIdentifier: bundleIdentifier),
+			let bundle = Bundle(url: url)
+		else {
+			return nil
+		}
+
+		return bundle.name
 	}
 }
