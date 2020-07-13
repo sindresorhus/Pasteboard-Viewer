@@ -1,4 +1,3 @@
-import Cocoa
 import SwiftUI
 import AppCenter
 import AppCenterCrashes

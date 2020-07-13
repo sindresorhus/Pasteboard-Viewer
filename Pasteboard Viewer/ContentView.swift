@@ -43,7 +43,9 @@ struct ContentView: View {
 				Text("Source")
 					.foregroundColor(.secondary)
 					.font(.system(size: NSFont.smallSystemFontSize))
-					.bold()
+					// TODO: Check how the below looks on macOS 11.
+					//.font(.subheadline)
+					.fontWeight(.semibold)
 				HStack(spacing: 0) {
 					URLIcon(url: sourceAppUrl!)
 						.frame(height: 18)

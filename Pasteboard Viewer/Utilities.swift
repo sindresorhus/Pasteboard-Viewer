@@ -621,6 +621,19 @@ extension BinaryInteger {
 }
 
 
+extension NSRunningApplication {
+	/// Like `.localizedName` but guaranteed to return something useful even if the name is not available.
+	var localizedTitle: String {
+		localizedName
+			?? executableURL?.deletingPathExtension().lastPathComponent
+			?? bundleURL?.deletingPathExtension().lastPathComponent
+			?? bundleIdentifier
+			?? (processIdentifier == -1 ? nil : "PID\(processIdentifier)")
+			?? "<Unknown>"
+	}
+}
+
+
 /// Static representation of a window.
 /// - Note: The `name` property is always `nil` on macOS 10.15 and later unless you request “Screen Recording” permission.
 struct Window {
@@ -650,8 +663,9 @@ struct Window {
 
 		let processIdentifier = window[kCGWindowOwnerPID as String] as! Int
 		let app = NSRunningApplication(processIdentifier: pid_t(processIdentifier))
+		// TODO: When MS AppCenter supports manually sending crash logs, send one here when `window[kCGWindowOwnerName as String]` is `nil` so I can figure out in what cases it would e `nil` and improve the logic.
 		self.owner = Owner(
-			name: window[kCGWindowOwnerName as String] as! String,
+			name: window[kCGWindowOwnerName as String] as? String ?? app?.localizedTitle ?? "<Unknown>",
 			processIdentifier: processIdentifier,
 			bundleIdentifier: app?.bundleIdentifier,
 			app: app
@@ -857,7 +871,7 @@ extension QuickLookPreview {
 		let fileExtension = URL.fileExtensionForTypeIdentifier(typeIdentifier) ?? "txt"
 
 		let url = temporaryDirectory
-			.appendingPathComponent("data")
+			.appendingPathComponent("data", isDirectory: false)
 			.appendingPathExtension(fileExtension)
 
 		guard (try? data.write(to: url)) != nil else {

@@ -10,6 +10,7 @@
 		E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E31C294123FBE2FA00DF3442 /* Defaults */; };
 		E31C294423FBE32200DF3442 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C294323FBE32200DF3442 /* Constants.swift */; };
 		E337758A2486CB9200DBE2A0 /* AppCenterCrashes in Frameworks */ = {isa = PBXBuildFile; productRef = E33775892486CB9200DBE2A0 /* AppCenterCrashes */; };
+		E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */; };
 		E3A7F1DD23F7DAD400CDF428 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DC23F7DAD400CDF428 /* AppDelegate.swift */; };
 		E3A7F1DF23F7DAD400CDF428 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DE23F7DAD400CDF428 /* ContentView.swift */; };
 		E3A7F1E123F7DAD700CDF428 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3A7F1E023F7DAD700CDF428 /* Assets.xcassets */; };
@@ -22,6 +23,7 @@
 
 /* Begin PBXFileReference section */
 		E31C294323FBE32200DF3442 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = InternetAccessPolicy.json; sourceTree = "<group>"; };
 		E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pasteboard Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3A7F1DC23F7DAD400CDF428 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E3A7F1DE23F7DAD400CDF428 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -78,6 +80,7 @@
 				E3A7F1E523F7DAD700CDF428 /* Main.storyboard */,
 				E3A7F1E823F7DAD700CDF428 /* Info.plist */,
 				E3A7F1E923F7DAD700CDF428 /* Pasteboard_Viewer.entitlements */,
+				E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */,
 				E3A7F1E223F7DAD700CDF428 /* Preview Content */,
 			);
 			path = "Pasteboard Viewer";
@@ -158,6 +161,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */,
 				E3A7F1E723F7DAD700CDF428 /* Main.storyboard in Resources */,
 				E3A7F1E423F7DAD700CDF428 /* Preview Assets.xcassets in Resources */,
 				E3A7F1E123F7DAD700CDF428 /* Assets.xcassets in Resources */,
