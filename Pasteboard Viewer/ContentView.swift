@@ -20,7 +20,7 @@ struct ContentView: View {
 		}
 
 		DispatchQueue.main.async {
-			self.selectedType = self.selectedPasteboard.types.first
+			selectedType = selectedPasteboard.types.first
 		}
 	}
 
@@ -37,8 +37,7 @@ struct ContentView: View {
 
 	@ViewBuilder
 	private func sourceAppView() -> some View {
-		// TODO: Use `if-let` when using Swift 5.3.
-		if sourceAppUrl != nil {
+		if let sourceAppUrl = sourceAppUrl {
 			VStack(alignment: .leading) {
 				Text("Source")
 					.foregroundColor(.secondary)
@@ -47,7 +46,7 @@ struct ContentView: View {
 					//.font(.subheadline)
 					.fontWeight(.semibold)
 				HStack(spacing: 0) {
-					URLIcon(url: sourceAppUrl!)
+					URLIcon(url: sourceAppUrl)
 						.frame(height: 18)
 					Text(NSWorkspace.shared.appName(forBundleIdentifier: pasteboardObservable.info?.sourceAppBundleIdentifier ?? "") ?? "")
 						.lineLimit(1)
@@ -70,8 +69,8 @@ struct ContentView: View {
 					"",
 					// TODO: This should use `View#onChange` when targeting macOS 11.
 					enumBinding: $selectedPasteboard.onChange { _ in
-						self.selectedType = self.selectedPasteboard.types.first
-						self.pasteboardObservable.pasteboard = self.selectedPasteboard.nsPasteboard
+						selectedType = selectedPasteboard.types.first
+						pasteboardObservable.pasteboard = selectedPasteboard.nsPasteboard
 					}
 				) { pasteboard, _ in
 					// TODO: Add Command+1/2/3/4 keyboard shortcuts when targeting macOS 11 (`View#keyboardShortcut()`).
@@ -101,11 +100,12 @@ struct ContentView: View {
 					.padding(.top, -22) // Workaround for SwiftUI bug.
 				sourceAppView()
 			}
-				// TODO: Make this `minWidth: 180` when SwiftUI is able to persist the sidebar size.
+				// TODO: Use this when SwiftUI is able to persist the sidebar size.
+				// .frame(minWidth: 180, idealWidth: 200, maxWidth: 300)
 				.frame(minWidth: 200, maxWidth: 300)
 			PasteboardContentsView(
-				pasteboard: self.selectedPasteboard,
-				type: self.selectedType
+				pasteboard: selectedPasteboard,
+				type: selectedType
 			)
 		}
 			.frame(minWidth: 500, minHeight: 300)

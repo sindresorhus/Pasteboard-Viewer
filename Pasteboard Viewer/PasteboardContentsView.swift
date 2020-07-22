@@ -9,8 +9,9 @@ struct PasteboardContentsView: View {
 
 	// TODO: Find a way to return `some View` here.
 	var contents: AnyView {
-		guard let type = self.type?.type else {
-			return Text("No pasteboard items")
+		guard let type = type?.type else {
+			// TODO: Use my empty state modifier.
+			return Text("No Pasteboard Items")
 				.foregroundColor(.secondary)
 				.eraseToAnyView()
 		}

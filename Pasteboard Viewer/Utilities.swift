@@ -297,8 +297,8 @@ extension Binding where Value: CaseIterable & Equatable {
 	*/
 	var caseIndex: Binding<Value.AllCases.Index> {
 		.init(
-			get: { Value.allCases.firstIndex(of: self.wrappedValue)! },
-			set: { self.wrappedValue = Value.allCases[$0] }
+			get: { Value.allCases.firstIndex(of: wrappedValue)! },
+			set: { wrappedValue = Value.allCases[$0] }
 		)
 	}
 }
@@ -347,7 +347,7 @@ struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatab
 	var body: some View {
 		Picker(selection: enumBinding.caseIndex, label: label) {
 			ForEach(Array(Enum.allCases).indexed(), id: \.0) { index, element in
-				self.content(element, element == self.enumBinding.wrappedValue)
+				content(element, element == enumBinding.wrappedValue)
 					.tag(index)
 			}
 		}
@@ -531,11 +531,11 @@ extension Binding where Value: Equatable {
 	*/
 	func onChange(_ action: @escaping (Value) -> Void) -> Self {
 		.init(
-			get: { self.wrappedValue },
+			get: { wrappedValue },
 			set: {
-				let oldValue = self.wrappedValue
-				self.wrappedValue = $0
-				let newValue = self.wrappedValue
+				let oldValue = wrappedValue
+				wrappedValue = $0
+				let newValue = wrappedValue
 				if newValue != oldValue {
 					action(newValue)
 				}
@@ -578,13 +578,13 @@ private struct ForceFocusView: NSViewRepresentable {
 		override func viewDidMoveToWindow() {
 			guard
 				!hasFocused,
-				let window = self.window
+				let window = window
 			else {
 				return
 			}
 
-			DispatchQueue.main.async {
-				self.hasFocused = true
+			DispatchQueue.main.async { [self] in
+				hasFocused = true
 				window.makeFirstResponder(self)
 			}
 		}
