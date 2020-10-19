@@ -19,13 +19,13 @@ enum Pasteboard: CaseIterable {
 		case .general:
 			return .general
 		case .drag:
-			return NSPasteboard(name: .drag)
+			return .init(name: .drag)
 		case .find:
-			return NSPasteboard(name: .find)
+			return .init(name: .find)
 		case .font:
-			return NSPasteboard(name: .font)
+			return .init(name: .font)
 		case .ruler:
-			return NSPasteboard(name: .ruler)
+			return .init(name: .ruler)
 		}
 	}
 
@@ -48,7 +48,7 @@ enum Pasteboard: CaseIterable {
 			return []
 		}
 
-		let typeRawValues = types.map { $0.rawValue }
+		let typeRawValues = types.map(\.rawValue)
 
 		return types
 			// Filter out legacy formats that have more modern alternatives.

@@ -870,6 +870,7 @@ extension QuickLookPreview {
 
 		let fileExtension = URL.fileExtensionForTypeIdentifier(typeIdentifier) ?? "txt"
 
+		// TODO: When targeting macOS 11, use `UTType` here https://developer.apple.com/documentation/foundation/nsurl/3584837-appendingpathextension
 		let url = temporaryDirectory
 			.appendingPathComponent("data", isDirectory: false)
 			.appendingPathExtension(fileExtension)

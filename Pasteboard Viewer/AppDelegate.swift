@@ -3,7 +3,7 @@ import AppCenter
 import AppCenterCrashes
 import Defaults
 
-@NSApplicationMain
+@main
 final class AppDelegate: NSObject, NSApplicationDelegate {
 	var window: NSWindow!
 
@@ -39,6 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 		)
 
 		window.title = App.name
+		// TODO: Window subtitle.
 		window.tabbingMode = .disallowed
 		window.center()
 		window.setFrameAutosaveName("Main Window")
@@ -52,7 +53,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 
 	func setUpEvents() {
-		Defaults.observe(.stayInFront) { [self] in
+		Defaults.observe(.stayOnTop) { [self] in
 			window.level = $0.newValue ? .floating : .normal
 		}
 			.tieToLifetime(of: self)

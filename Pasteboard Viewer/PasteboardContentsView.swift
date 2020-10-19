@@ -1,22 +1,23 @@
 import SwiftUI
 
 struct PasteboardContentsView: View {
-	// TODO: When using Swift 5.2, make this `@Lazy @ObservedObject` and remove the explicit init.
-	@ObservedObject private var pasteboardObservable: NSPasteboard.Observable
+	// TODO: Try removing this when targeting macOS 11.
+	@EnvironmentObject private var pasteboardObservable: NSPasteboard.Observable
 
-	var pasteboard: Pasteboard
 	var type: Pasteboard.PasteboardType?
 
-	// TODO: Find a way to return `some View` here.
+	// TODO: Find a way to return `some View` here. With macOS 11, we can since it supports `if-let`.
 	var contents: AnyView {
-		guard let type = type?.type else {
+		guard let type = type else {
 			// TODO: Use my empty state modifier.
 			return Text("No Pasteboard Items")
 				.foregroundColor(.secondary)
 				.eraseToAnyView()
 		}
 
-		let data = pasteboard.nsPasteboard.data(forType: type)
+		let pasteboard = type.pasteboard
+		let nsPasteboardType = type.type
+		let data = pasteboard.nsPasteboard.data(forType: nsPasteboardType)
 
 		if
 			let data = data,
@@ -39,7 +40,7 @@ struct PasteboardContentsView: View {
 				.eraseToAnyView()
 		}
 
-		if let string = pasteboard.nsPasteboard.string(forType: type) {
+		if let string = pasteboard.nsPasteboard.string(forType: nsPasteboardType) {
 			return ScrollableTextView(
 				text: .constant(string),
 				borderType: .noBorder
@@ -49,7 +50,7 @@ struct PasteboardContentsView: View {
 
 		if
 			let data = data,
-			let view = QuickLookPreview(data: data, typeIdentifier: type.rawValue)
+			let view = QuickLookPreview(data: data, typeIdentifier: nsPasteboardType.rawValue)
 		{
 			return view
 				.background(Color(NSColor.textBackgroundColor))
@@ -72,11 +73,5 @@ struct PasteboardContentsView: View {
 	var body: some View {
 		contents
 			.frame(maxWidth: .infinity, maxHeight: .infinity)
-	}
-
-	init(pasteboard: Pasteboard, type: Pasteboard.PasteboardType?) {
-		self.pasteboard = pasteboard
-		self.type = type
-		self.pasteboardObservable = NSPasteboard.Observable(pasteboard.nsPasteboard)
 	}
 }

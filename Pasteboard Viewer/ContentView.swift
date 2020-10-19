@@ -103,10 +103,8 @@ struct ContentView: View {
 				// TODO: Use this when SwiftUI is able to persist the sidebar size.
 				// .frame(minWidth: 180, idealWidth: 200, maxWidth: 300)
 				.frame(minWidth: 200, maxWidth: 300)
-			PasteboardContentsView(
-				pasteboard: selectedPasteboard,
-				type: selectedType
-			)
+			PasteboardContentsView(type: selectedType)
+				.environmentObject(pasteboardObservable)
 		}
 			.frame(minWidth: 500, minHeight: 300)
 	}

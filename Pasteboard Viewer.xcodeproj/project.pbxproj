@@ -432,7 +432,7 @@
 			repositoryURL = "https://github.com/microsoft/appcenter-sdk-apple";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 3.3.0;
+				minimumVersion = 3.3.4;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
