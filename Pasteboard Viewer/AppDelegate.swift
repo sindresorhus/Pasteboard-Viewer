@@ -48,6 +48,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 		setUpEvents()
 
 		window.makeKeyAndOrderFront(nil)
+
+		showWelcomeScreenIfNeeded()
 	}
 
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }

@@ -980,3 +980,86 @@ extension NSWorkspace {
 		return bundle.name
 	}
 }
+
+
+extension NSAlert {
+	/// Show an alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
+	@discardableResult
+	static func showModal(
+		for window: NSWindow? = nil,
+		message: String,
+		informativeText: String? = nil,
+		style: Style = .warning,
+		buttonTitles: [String] = [],
+		defaultButtonIndex: Int? = nil
+	) -> NSApplication.ModalResponse {
+		NSAlert(
+			message: message,
+			informativeText: informativeText,
+			style: style,
+			buttonTitles: buttonTitles,
+			defaultButtonIndex: defaultButtonIndex
+		).runModal(for: window)
+	}
+
+	/// The index in the `buttonTitles` array for the button to use as default.
+	/// Set `-1` to not have any default. Useful for really destructive actions.
+	var defaultButtonIndex: Int {
+		get {
+			buttons.firstIndex { $0.keyEquivalent == "\r" } ?? -1
+		}
+		set {
+			// Clear the default button indicator from other buttons.
+			for button in buttons where button.keyEquivalent == "\r" {
+				button.keyEquivalent = ""
+			}
+
+			if newValue != -1 {
+				buttons[newValue].keyEquivalent = "\r"
+			}
+		}
+	}
+
+	convenience init(
+		message: String,
+		informativeText: String? = nil,
+		style: Style = .warning,
+		buttonTitles: [String] = [],
+		defaultButtonIndex: Int? = nil
+	) {
+		self.init()
+		self.messageText = message
+		self.alertStyle = style
+
+		if let informativeText = informativeText {
+			self.informativeText = informativeText
+		}
+
+		addButtons(withTitles: buttonTitles)
+
+		if let defaultButtonIndex = defaultButtonIndex {
+			self.defaultButtonIndex = defaultButtonIndex
+		}
+	}
+
+	/// Runs the alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
+	@discardableResult
+	func runModal(for window: NSWindow? = nil) -> NSApplication.ModalResponse {
+		guard let window = window else {
+			return runModal()
+		}
+
+		beginSheetModal(for: window) { returnCode in
+			NSApp.stopModal(withCode: returnCode)
+		}
+
+		return NSApp.runModal(for: window)
+	}
+
+	/// Adds buttons with the given titles to the alert.
+	func addButtons(withTitles buttonTitles: [String]) {
+		for buttonTitle in buttonTitles {
+			addButton(withTitle: buttonTitle)
+		}
+	}
+}
