@@ -16,10 +16,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 	}
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
-		MSAppCenter.start(
-			"3da13331-e82c-4245-b7fa-023424c17f16",
-			withServices: [
-				MSCrashes.self
+		AppCenter.start(
+			withAppSecret: "3da13331-e82c-4245-b7fa-023424c17f16",
+			services: [
+				Crashes.self
 			]
 		)
 
@@ -38,7 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 			defer: false
 		)
 
-		window.title = App.name
+		window.title = SSApp.name
 		// TODO: Window subtitle.
 		window.tabbingMode = .disallowed
 		window.center()

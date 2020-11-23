@@ -9,7 +9,7 @@ final class FeedbackMenuItem: NSMenuItem {
 		super.init(coder: decoder)
 
 		onAction = { _ in
-			App.openSendFeedbackPage()
+			SSApp.openSendFeedbackPage()
 		}
 	}
 }
@@ -50,7 +50,7 @@ final class ObjectAssociation<T: Any> {
 extension NSMenuItem {
 	typealias ActionClosure = ((NSMenuItem) -> Void)
 
-	private struct AssociatedKeys {
+	private enum AssociatedKeys {
 		static let onActionClosure = ObjectAssociation<ActionClosure>()
 	}
 
@@ -85,7 +85,7 @@ extension NSMenuItem {
 extension NSControl {
 	typealias ActionClosure = ((NSControl) -> Void)
 
-	private struct AssociatedKeys {
+	private enum AssociatedKeys {
 		static let onActionClosure = ObjectAssociation<ActionClosure>()
 	}
 
@@ -116,7 +116,7 @@ extension NSControl {
 }
 
 
-struct App {
+enum SSApp {
 	static let id = Bundle.main.bundleIdentifier!
 	static let name = Bundle.main.object(forInfoDictionaryKey: kCFBundleNameKey as String) as! String
 	static let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
@@ -137,13 +137,13 @@ struct App {
 	static func openSendFeedbackPage() {
 		let metadata =
 			"""
-			\(App.name) \(App.versionWithBuild) - \(App.id)
+			\(SSApp.name) \(SSApp.versionWithBuild) - \(SSApp.id)
 			macOS \(System.osVersion)
 			\(System.hardwareModel)
 			"""
 
 		let query: [String: String] = [
-			"product": App.name,
+			"product": SSApp.name,
 			"metadata": metadata
 		]
 
@@ -216,7 +216,7 @@ extension URL {
 }
 
 
-struct System {
+enum System {
 	static let osVersion: String = {
 		let os = ProcessInfo.processInfo.operatingSystemVersion
 		return "\(os.majorVersion).\(os.minorVersion).\(os.patchVersion)"
@@ -708,6 +708,15 @@ extension Window {
 			return false
 		}
 
+		let appIgnoreList = [
+			"com.apple.dock",
+			"com.apple.notificationcenterui"
+		]
+
+		if appIgnoreList.contains(window.owner.bundleIdentifier ?? "") {
+			return false
+		}
+
 		return true
 	}
 
@@ -725,7 +734,7 @@ extension Window {
 	This method returns more correct results than `NSWorkspace.shared.frontmostApplication?.bundleIdentifier`. For example, the latter cannot correctly detect the 1Password Mini window.
 	*/
 	static func appBundleIdentifierForFrontmostWindow() -> String? {
-		allWindows().lazy.compactMap { $0.owner.bundleIdentifier }.first ?? NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+		allWindows().lazy.compactMap(\.owner.bundleIdentifier).first ?? NSWorkspace.shared.frontmostApplication?.bundleIdentifier
 	}
 }
 
@@ -806,7 +815,6 @@ extension NSPasteboard {
 				}
 
 				self.info = $0
-				self.objectWillChange.send()
 			}
 		}
 
@@ -817,7 +825,7 @@ extension NSPasteboard {
 	}
 }
 
-
+// TODO: Use UTType when targeting macOS 11.
 extension URL {
 	/**
 	Returns the type identifier for a file extension.
@@ -859,12 +867,14 @@ extension QuickLookPreview {
 
 extension QuickLookPreview {
 	init?(data: Data, typeIdentifier: String) {
-		guard let temporaryDirectory = try? FileManager.default.url(
-			for: .itemReplacementDirectory,
-			in: .userDomainMask,
-			appropriateFor: FileManager.default.homeDirectoryForCurrentUser,
-			create: true
-		) else {
+		guard
+			let temporaryDirectory = try? FileManager.default.url(
+				for: .itemReplacementDirectory,
+				in: .userDomainMask,
+				appropriateFor: FileManager.default.homeDirectoryForCurrentUser,
+				create: true
+			)
+		else {
 			return nil
 		}
 
@@ -916,7 +926,7 @@ extension String {
 	func copyToPasteboard() {
 		NSPasteboard.general.clearContents()
 		NSPasteboard.general.setString(self, forType: .string)
-		NSPasteboard.general.setString(App.id, forType: .sourceAppBundleIdentifier)
+		NSPasteboard.general.setString(SSApp.id, forType: .sourceAppBundleIdentifier)
 	}
 }
 

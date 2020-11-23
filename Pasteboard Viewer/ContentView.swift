@@ -8,7 +8,7 @@ struct ContentView: View {
 	@State private var selectedType: Pasteboard.PasteboardType?
 
 	private func setWindowTitle() {
-		AppDelegate.shared.window.title = selectedType?.title ?? App.name
+		AppDelegate.shared.window.title = selectedType?.title ?? SSApp.name
 	}
 
 	private func setPasteboardType() {
@@ -66,7 +66,7 @@ struct ContentView: View {
 		return NavigationView {
 			VStack(alignment: .leading) {
 				EnumPicker(
-					"",
+					"Pasteboard Type",
 					// TODO: This should use `View#onChange` when targeting macOS 11.
 					enumBinding: $selectedPasteboard.onChange { _ in
 						selectedType = selectedPasteboard.types.first
