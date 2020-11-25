@@ -1,18 +1,38 @@
 import AppKit
 
-enum Pasteboard: CaseIterable {
+enum Pasteboard: Equatable, CaseIterable {
 	case general
 	case drag
 	case find
 	case font
 	case ruler
 
-	struct PasteboardType: Hashable, Identifiable {
-		let pasteboard: Pasteboard
-		let type: NSPasteboard.PasteboardType
-		var id: String { type.rawValue }
-		var title: String { type.rawValue }
+	struct Type_: Hashable, Identifiable {
+		let item: Item
+		let nsType: NSPasteboard.PasteboardType
+
+		var id: String { "\(item.id)-\(nsType.rawValue)" }
+		var title: String { nsType.rawValue }
+
+		func data() -> Data? { item.rawValue.data(forType: nsType) }
+		func string() -> String? { item.rawValue.string(forType: nsType) }
 	}
+
+	struct Item: RawRepresentable, Hashable, Identifiable {
+		let rawValue: NSPasteboardItem
+
+		var id: Int { rawValue.hashValue }
+
+		var types: [Type_] {
+			rawValue.modernTypes.map { Type_(item: self, nsType: $0) }
+		}
+	}
+
+	var items: [Item] {
+		nsPasteboard.pasteboardItems?.map { Item(rawValue: $0) } ?? []
+	}
+
+	var firstType: Type_? { items.first?.types.first }
 
 	var nsPasteboard: NSPasteboard {
 		switch self {
@@ -28,7 +48,10 @@ enum Pasteboard: CaseIterable {
 			return .init(name: .ruler)
 		}
 	}
+}
 
+
+extension NSPasteboardItem {
 	private static var typeExclusions = [
 		"NSStringPboardType": "public.utf8-plain-text",
 		"NSFilenamesPboardType": "public.file-url",
@@ -43,8 +66,9 @@ enum Pasteboard: CaseIterable {
 		"NSColor pasteboard type": "com.apple.cocoa.pasteboard.color"
 	]
 
-	var types: [PasteboardType] {
-		guard let types = nsPasteboard.types else {
+	/// `.types` without legacy junk.
+	var modernTypes: [NSPasteboard.PasteboardType] {
+		guard !types.isEmpty else {
 			return []
 		}
 
@@ -75,6 +99,5 @@ enum Pasteboard: CaseIterable {
 
 				return true
 			}
-			.map { PasteboardType(pasteboard: self, type: $0) }
 	}
 }

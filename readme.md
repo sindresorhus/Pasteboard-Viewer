@@ -25,13 +25,15 @@ Tip: Right-click an item in the sidebar to copy the type identifier.
 
 ## Download
 
-[![](https://linkmaker.itunes.apple.com/assets/shared/badges/en-us/macappstore-lrg.svg)](https://apps.apple.com/app/id1499215709?mt=12)
+[![](https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/en-us?size=250x83&releaseDate=1615852800)](https://apps.apple.com/app/id1499215709)
 
-Requires macOS 10.15 or later.
+Requires macOS 11 or later.
+
+*[Last macOS 10.15 compatible version.](https://github.com/sindresorhus/Pasteboard-Viewer/releases/tag/v1.5.1)*
 
 ## Screenshot
 
-<img src="Stuff/screenshot1.jpg" width="1163">
+![](Stuff/screenshot1.jpg)
 
 ## FAQ
 
@@ -43,15 +45,9 @@ It's a reference to the icon of Apple's old NSPasteboard sample app called [Clip
 
 #### Can I contribute localizations?
 
-I'm not interested in localizing the app.
+I don't have any immediate plans to localize the app.
 
-#### Can you add support for macOS 10.14 or older?
-
-This app uses SwiftUI, which only works on macOS 10.15 and later.
-
-## Related
+## Links
 
 - [Website](https://sindresorhus.com/pasteboard-viewer)
-- [Dato](https://sindresorhus.com/dato) - Better menu bar clock with calendar and time zones
-- [Gifski](https://github.com/sindresorhus/Gifski) - Convert videos to high-quality GIFs
-- [More apps…](https://sindresorhus.com/apps)
+- [More apps by me](https://sindresorhus.com/apps)

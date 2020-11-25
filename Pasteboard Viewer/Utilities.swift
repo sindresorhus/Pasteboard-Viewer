@@ -1,39 +1,8 @@
 import SwiftUI
 import Combine
 import Quartz
-
-
-/// Subclass this in Interface Builder with the title "Send Feedback…".
-final class FeedbackMenuItem: NSMenuItem {
-	required init(coder decoder: NSCoder) {
-		super.init(coder: decoder)
-
-		onAction = { _ in
-			SSApp.openSendFeedbackPage()
-		}
-	}
-}
-
-
-/// Subclass this in Interface Builder and set the `Url` field there.
-final class UrlMenuItem: NSMenuItem {
-	@IBInspectable var url: String?
-
-	required init(coder decoder: NSCoder) {
-		super.init(coder: decoder)
-
-		onAction = { [weak self] _ in
-			guard
-				let self = self,
-				let url = self.url
-			else {
-				return
-			}
-
-			NSWorkspace.shared.open(URL(string: url)!)
-		}
-	}
-}
+import UniformTypeIdentifiers
+import Defaults
 
 
 final class ObjectAssociation<T: Any> {
@@ -42,75 +11,6 @@ final class ObjectAssociation<T: Any> {
 			objc_getAssociatedObject(index, Unmanaged.passUnretained(self).toOpaque()) as! T?
 		} set {
 			objc_setAssociatedObject(index, Unmanaged.passUnretained(self).toOpaque(), newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-		}
-	}
-}
-
-
-extension NSMenuItem {
-	typealias ActionClosure = ((NSMenuItem) -> Void)
-
-	private enum AssociatedKeys {
-		static let onActionClosure = ObjectAssociation<ActionClosure>()
-	}
-
-	// The explicit naming here is to prevent conflicts since this method is exposed to Objective-C.
-	@objc
-	private func callClosurePasteboardViewer(_ sender: NSMenuItem) {
-		onAction?(sender)
-	}
-
-	/**
-	Closure version of `.action`.
-
-	```
-	let menuItem = NSMenuItem(title: "Unicorn")
-
-	menuItem.onAction = { sender in
-		print("NSMenuItem action: \(sender)")
-	}
-	```
-	*/
-	var onAction: ActionClosure? {
-		get { AssociatedKeys.onActionClosure[self] }
-		set {
-			AssociatedKeys.onActionClosure[self] = newValue
-			action = #selector(callClosurePasteboardViewer)
-			target = self
-		}
-	}
-}
-
-
-extension NSControl {
-	typealias ActionClosure = ((NSControl) -> Void)
-
-	private enum AssociatedKeys {
-		static let onActionClosure = ObjectAssociation<ActionClosure>()
-	}
-
-	@objc
-	private func callClosurePasteboardViewer(_ sender: NSControl) {
-		onAction?(sender)
-	}
-
-	/**
-	Closure version of `.action`.
-
-	```
-	let button = NSButton(title: "Unicorn", target: nil, action: nil)
-
-	button.onAction = { sender in
-		print("Button action: \(sender)")
-	}
-	```
-	*/
-	var onAction: ActionClosure? {
-		get { AssociatedKeys.onActionClosure[self] }
-		set {
-			AssociatedKeys.onActionClosure[self] = newValue
-			action = #selector(callClosurePasteboardViewer)
-			target = self
 		}
 	}
 }
@@ -339,28 +239,19 @@ struct ContentView: View {
 }
 ```
 */
-struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatable, Enum.AllCases.Index == Int, Label: View, Content: View {
-	private let enumBinding: Binding<Enum>
-	private let label: Label
-	private let content: (Enum, Bool) -> Content
+struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatable, Enum.AllCases.Index: Hashable, Label: View, Content: View {
+	let enumBinding: Binding<Enum>
+	let label: Label
+	@ViewBuilder let content: (Enum, Bool) -> Content
 
 	var body: some View {
 		Picker(selection: enumBinding.caseIndex, label: label) {
 			ForEach(Array(Enum.allCases).indexed(), id: \.0) { index, element in
+				// TODO: Is `isSelected` really useful? If not, remove it.
 				content(element, element == enumBinding.wrappedValue)
 					.tag(index)
 			}
 		}
-	}
-
-	init(
-		enumBinding: Binding<Enum>,
-		label: Label,
-		@ViewBuilder content: @escaping (Enum, Bool) -> Content
-	) {
-		self.enumBinding = enumBinding
-		self.label = label
-		self.content = content
 	}
 }
 
@@ -436,7 +327,7 @@ struct ScrollableTextView: NSViewRepresentable {
 		textView.isSelectable = true
 		textView.allowsUndo = true
 		textView.textContainerInset = CGSize(width: 5, height: 10)
-		textView.textColor = .controlTextColor
+		textView.usesAdaptiveColorMappingForDarkAppearance = true
 
 		return scrollView
 	}
@@ -476,6 +367,7 @@ struct ScrollableAttributedTextView: NSViewRepresentable {
 		textView.isSelectable = true
 		textView.textContainerInset = CGSize(width: 5, height: 10)
 		textView.textColor = .controlTextColor
+		textView.usesAdaptiveColorMappingForDarkAppearance = true
 
 		return scrollView
 	}
@@ -514,42 +406,6 @@ extension View {
 }
 
 
-extension Binding where Value: Equatable {
-	/**
-	Get notified when the binding value changes to a different one.
-
-	Can be useful to manually update non-reactive properties.
-
-	```
-	Toggle(
-		"Foo",
-		isOn: $foo.onChange {
-			bar.isEnabled = $0
-		}
-	)
-	```
-	*/
-	func onChange(_ action: @escaping (Value) -> Void) -> Self {
-		.init(
-			get: { wrappedValue },
-			set: {
-				let oldValue = wrappedValue
-				wrappedValue = $0
-				let newValue = wrappedValue
-				if newValue != oldValue {
-					action(newValue)
-				}
-			}
-		)
-	}
-}
-
-
-extension AppDelegate {
-	static let shared = NSApp.delegate as! AppDelegate
-}
-
-
 extension NSPasteboard {
 	/// Human-readable name of the pasteboard.
 	var presentableName: String {
@@ -576,16 +432,19 @@ private struct ForceFocusView: NSViewRepresentable {
 		private var hasFocused = false
 
 		override func viewDidMoveToWindow() {
-			guard
-				!hasFocused,
-				let window = window
-			else {
-				return
-			}
+			DispatchQueue.main.async {
+				// The second dispatch call prevents `AttributeGraph` warnings.
+				DispatchQueue.main.async { [self] in
+					guard
+						!hasFocused,
+						let window = window
+					else {
+						return
+					}
 
-			DispatchQueue.main.async { [self] in
-				hasFocused = true
-				window.makeFirstResponder(self)
+					hasFocused = true
+					window.makeFirstResponder(self)
+				}
 			}
 		}
 	}
@@ -710,7 +569,9 @@ extension Window {
 
 		let appIgnoreList = [
 			"com.apple.dock",
-			"com.apple.notificationcenterui"
+			"com.apple.notificationcenterui",
+			"com.apple.screencaptureui",
+			"com.sindresorhus.Pasteboard-Viewer"
 		]
 
 		if appIgnoreList.contains(window.owner.bundleIdentifier ?? "") {
@@ -727,14 +588,46 @@ extension Window {
 		let info = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] ?? []
 		return info.map { self.init(windowDictionary: $0) }.filter(filter)
 	}
+}
+
+extension Window {
+	struct UserApp: Hashable, Identifiable {
+		let url: URL
+		let bundleIdentifier: String
+
+		var id: URL { url }
+	}
 
 	/**
-	Returns the bundle identifier of the app that owns the frontmost window.
+	Returns the URL and bundle identifier of the app that owns the frontmost window.
 
 	This method returns more correct results than `NSWorkspace.shared.frontmostApplication?.bundleIdentifier`. For example, the latter cannot correctly detect the 1Password Mini window.
 	*/
-	static func appBundleIdentifierForFrontmostWindow() -> String? {
-		allWindows().lazy.compactMap(\.owner.bundleIdentifier).first ?? NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+	static func appOwningFrontmostWindow() -> UserApp? {
+		func createApp(_ runningApp: NSRunningApplication?) -> UserApp? {
+			guard
+				let app = runningApp,
+				let url = app.bundleURL,
+				let bundleIdentifier = app.bundleIdentifier
+			else {
+				return nil
+			}
+
+			return UserApp(url: url, bundleIdentifier: bundleIdentifier)
+		}
+
+		guard
+			let app = (
+				allWindows()
+					.lazy
+					.compactMap { createApp($0.owner.app) }
+					.first
+			)
+		else {
+			return createApp(NSWorkspace.shared.frontmostApplication)
+		}
+
+		return app
 	}
 }
 
@@ -751,7 +644,7 @@ extension NSPasteboard.PasteboardType {
 
 extension NSPasteboard {
 	/// Information about the pasteboard contents.
-	struct ContentsInfo: Identifiable {
+	struct ContentsInfo: Equatable, Identifiable {
 		let id = UUID()
 
 		/// The date when the current pasteboard data was added.
@@ -759,6 +652,10 @@ extension NSPasteboard {
 
 		/// The bundle identifier of the app that put the data on the pasteboard.
 		let sourceAppBundleIdentifier: String?
+
+		/// The URL of the app that put the data on the pasteboard.
+		/// - Note: Don't assume this is non-optional if `sourceAppBundleIdentifier` is.
+		let sourceAppURL: URL?
 	}
 
 	/// Returns a publisher that emits when the pasteboard changes.
@@ -784,12 +681,31 @@ extension NSPasteboard {
 					let source = self.string(forType: .sourceAppBundleIdentifier)
 				else {
 					// We ignore the first event in this case as we cannot know if the existing pasteboard contents came from the frontmost app.
-					return isFirst ? nil : ContentsInfo(sourceAppBundleIdentifier: Window.appBundleIdentifierForFrontmostWindow())
+					guard !isFirst else {
+						return nil
+					}
+
+					let app = Window.appOwningFrontmostWindow()
+
+					return ContentsInfo(
+						sourceAppBundleIdentifier: app?.bundleIdentifier,
+						sourceAppURL: app?.url
+					)
 				}
 
-				// An empty string has special behavior ( http://nspasteboard.org ).
-				// > In case the original source of the content is not known, set `org.nspasteboard.source` to the empty string.
-				return ContentsInfo(sourceAppBundleIdentifier: source.isEmpty ? nil : source)
+				guard !source.isEmpty else {
+					// An empty string has special behavior ( http://nspasteboard.org ).
+					// > In case the original source of the content is not known, set `org.nspasteboard.source` to the empty string.
+					return ContentsInfo(
+						sourceAppBundleIdentifier: nil,
+						sourceAppURL: nil
+					)
+				}
+
+				return ContentsInfo(
+					sourceAppBundleIdentifier: source,
+					sourceAppURL: NSWorkspace.shared.urlForApplication(withBundleIdentifier: source)
+				)
 			}
 			.eraseToAnyPublisher()
 	}
@@ -825,29 +741,22 @@ extension NSPasteboard {
 	}
 }
 
-// TODO: Use UTType when targeting macOS 11.
-extension URL {
-	/**
-	Returns the type identifier for a file extension.
-
-	```
-	URL.fileExtensionForTypeIdentifier("public.png")
-	//=> "png"
-	```
-	*/
-	static func fileExtensionForTypeIdentifier(_ typeIdentifier: String) -> String? {
-		UTTypeCopyPreferredTagWithClass(typeIdentifier as CFString, kUTTagClassFilenameExtension)?.takeRetainedValue() as String?
-	}
-}
-
 
 struct QuickLookPreview: NSViewRepresentable {
 	typealias NSViewType = QLPreviewView
 
+	static func dismantleNSView(_ nsView: QLPreviewView, coordinator: Void) {
+		nsView.close()
+	}
+
 	/// The item to preview.
 	let previewItem: QLPreviewItem
 
-	func makeNSView(context: Context) -> NSViewType { .init() }
+	func makeNSView(context: Context) -> NSViewType {
+		let nsView = NSViewType()
+		nsView.shouldCloseWithWindow = false // This prevents some crashes I was seeing.
+		return nsView
+	}
 
 	func updateNSView(_ nsView: NSViewType, context: Context) {
 		nsView.previewItem = previewItem
@@ -866,7 +775,7 @@ extension QuickLookPreview {
 }
 
 extension QuickLookPreview {
-	init?(data: Data, typeIdentifier: String) {
+	init?(data: Data, contentType: UTType) {
 		guard
 			let temporaryDirectory = try? FileManager.default.url(
 				for: .itemReplacementDirectory,
@@ -878,12 +787,9 @@ extension QuickLookPreview {
 			return nil
 		}
 
-		let fileExtension = URL.fileExtensionForTypeIdentifier(typeIdentifier) ?? "txt"
-
-		// TODO: When targeting macOS 11, use `UTType` here https://developer.apple.com/documentation/foundation/nsurl/3584837-appendingpathextension
 		let url = temporaryDirectory
 			.appendingPathComponent("data", isDirectory: false)
-			.appendingPathExtension(fileExtension)
+			.appendingPathExtension(for: contentType)
 
 		guard (try? data.write(to: url)) != nil else {
 			return nil
@@ -891,6 +797,12 @@ extension QuickLookPreview {
 
 		self.init(url: url)
 	}
+}
+
+
+extension NSPasteboard.PasteboardType {
+	/// Convert a pasteboard type to a `UTType`.
+	var toUTType: UTType? { UTType(rawValue) }
 }
 
 
@@ -922,11 +834,43 @@ extension URL {
 }
 
 
+extension URL {
+	private func resourceValue<T>(forKey key: URLResourceKey) -> T? {
+		guard let values = try? resourceValues(forKeys: [key]) else {
+			return nil
+		}
+
+		return values.allValues[key] as? T
+	}
+
+	var localizedName: String? { resourceValue(forKey: .localizedNameKey) }
+}
+
+
 extension String {
 	func copyToPasteboard() {
 		NSPasteboard.general.clearContents()
 		NSPasteboard.general.setString(self, forType: .string)
 		NSPasteboard.general.setString(SSApp.id, forType: .sourceAppBundleIdentifier)
+	}
+}
+
+
+extension String {
+	func removingSuffix(_ suffix: Self, caseSensitive: Bool = true) -> Self {
+		guard caseSensitive else {
+			guard let range = self.range(of: suffix, options: [.caseInsensitive, .anchored, .backwards]) else {
+				return self
+			}
+
+			return replacingCharacters(in: range, with: "")
+		}
+
+		guard hasSuffix(suffix) else {
+			return self
+		}
+
+		return Self(dropLast(suffix.count))
 	}
 }
 
@@ -940,44 +884,22 @@ struct URLIcon: View {
 			.renderingMode(.original)
 			.resizable()
 			.aspectRatio(contentMode: .fit)
-	}
-}
-
-
-extension Bundle {
-	private func string(forInfoDictionaryKey key: String) -> String? {
-		// `object(forInfoDictionaryKey:)` prefers localized info dictionary over the regular one automatically
-		object(forInfoDictionaryKey: key) as? String
-	}
-
-	var name: String {
-		string(forInfoDictionaryKey: "CFBundleDisplayName")
-			?? string(forInfoDictionaryKey: "CFBundleName")
-			?? string(forInfoDictionaryKey: "CFBundleExecutable")
-			?? bundleIdentifier
-			?? ProcessInfo.processInfo.processName
+			.accessibilityHidden(true)
 	}
 }
 
 
 extension NSWorkspace {
 	/**
-	Get an app name from an app bundle identifier.
+	Get an app name from an app URL.
 
 	```
-	NSWorkspace.shared.appName(forBundleIdentifier: "com.sindresorhus.Lungo")
+	NSWorkspace.shared.appName(forURL: …)
 	//=> "Lungo"
 	```
 	*/
-	func appName(forBundleIdentifier bundleIdentifier: String) -> String? {
-		guard
-			let url = urlForApplication(withBundleIdentifier: bundleIdentifier),
-			let bundle = Bundle(url: url)
-		else {
-			return nil
-		}
-
-		return bundle.name
+	func appName(forURL url: URL) -> String? {
+		url.localizedName?.removingSuffix(".app")
 	}
 }
 
@@ -987,19 +909,20 @@ extension NSAlert {
 	@discardableResult
 	static func showModal(
 		for window: NSWindow? = nil,
-		message: String,
-		informativeText: String? = nil,
+		title: String,
+		message: String? = nil,
 		style: Style = .warning,
 		buttonTitles: [String] = [],
 		defaultButtonIndex: Int? = nil
 	) -> NSApplication.ModalResponse {
 		NSAlert(
+			title: title,
 			message: message,
-			informativeText: informativeText,
 			style: style,
 			buttonTitles: buttonTitles,
 			defaultButtonIndex: defaultButtonIndex
-		).runModal(for: window)
+		)
+			.runModal(for: window)
 	}
 
 	/// The index in the `buttonTitles` array for the button to use as default.
@@ -1021,18 +944,18 @@ extension NSAlert {
 	}
 
 	convenience init(
-		message: String,
-		informativeText: String? = nil,
+		title: String,
+		message: String? = nil,
 		style: Style = .warning,
 		buttonTitles: [String] = [],
 		defaultButtonIndex: Int? = nil
 	) {
 		self.init()
-		self.messageText = message
+		self.messageText = title
 		self.alertStyle = style
 
-		if let informativeText = informativeText {
-			self.informativeText = informativeText
+		if let message = message {
+			self.informativeText = message
 		}
 
 		addButtons(withTitles: buttonTitles)
@@ -1061,5 +984,191 @@ extension NSAlert {
 		for buttonTitle in buttonTitles {
 			addButton(withTitle: buttonTitle)
 		}
+	}
+}
+
+
+private struct WindowAccessor: NSViewRepresentable {
+	private final class WindowAccessorView: NSView {
+		@Binding var windowBinding: NSWindow?
+
+		init(binding: Binding<NSWindow?>) {
+			self._windowBinding = binding
+			super.init(frame: .zero)
+		}
+
+		override func viewDidMoveToWindow() {
+			super.viewDidMoveToWindow()
+			windowBinding = window
+		}
+
+		@available(*, unavailable)
+		required init?(coder: NSCoder) {
+			fatalError("init(coder:) has not been implemented")
+		}
+	}
+
+	@Binding var window: NSWindow?
+
+	init(_ window: Binding<NSWindow?>) {
+		self._window = window
+	}
+
+	func makeNSView(context: Context) -> NSView {
+		WindowAccessorView(binding: $window)
+	}
+
+	func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
+extension View {
+	/// Bind the native backing-window of a SwiftUI window to a property.
+	func bindNativeWindow(_ window: Binding<NSWindow?>) -> some View {
+		background(WindowAccessor(window))
+	}
+}
+
+private struct WindowViewModifier: ViewModifier {
+	@State private var window: NSWindow?
+
+	let onWindow: (NSWindow?) -> Void
+
+	func body(content: Content) -> some View {
+		onWindow(window)
+
+		return content
+			.bindNativeWindow($window)
+	}
+}
+
+extension View {
+	/// Access the native backing-window of a SwiftUI window.
+	func accessNativeWindow(_ onWindow: @escaping (NSWindow?) -> Void) -> some View {
+		modifier(WindowViewModifier(onWindow: onWindow))
+	}
+
+	/// Set the window level of a SwiftUI window.
+	func windowLevel(_ level: NSWindow.Level) -> some View {
+		accessNativeWindow {
+			$0?.level = level
+		}
+	}
+
+	/// Set the window tabbing mode of a SwiftUI window.
+	func windowTabbingMode(_ tabbingMode: NSWindow.TabbingMode) -> some View {
+		accessNativeWindow {
+			$0?.tabbingMode = tabbingMode
+		}
+	}
+}
+
+
+private struct OnChangeWithInitial<Value: Equatable>: ViewModifier {
+	let value: Value
+	let initial: Bool
+	let action: (Value) -> Void
+
+	func body(content: Content) -> some View {
+		content
+			.onChange(of: value, perform: action)
+			.onAppear {
+				guard initial else {
+					return
+				}
+
+				action(value)
+			}
+	}
+}
+
+extension View {
+	/// `.onChange` version that allows triggering initially (on appear) too, not just on change.
+	func onChange<V: Equatable>(
+		of value: V,
+		initial: Bool,
+		perform action: @escaping (V) -> Void
+	) -> some View {
+		modifier(OnChangeWithInitial(value: value, initial: initial, action: action))
+	}
+}
+
+
+struct ToggleSidebarToolbarItem: ToolbarContent {
+	var body: some ToolbarContent {
+		ToolbarItem(placement: .automatic) {
+			Button {
+				NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
+			} label: {
+				Image(systemName: "sidebar.left")
+			}
+				.help("Toggle Sidebar")
+		}
+	}
+}
+
+
+extension AppStorage {
+	init(_ key: Defaults.Key<Value>) where Value == Bool {
+		self.init(wrappedValue: key.defaultValue, key.name, store: key.suite)
+	}
+
+	init(_ key: Defaults.Key<Value>) where Value == String {
+		self.init(wrappedValue: key.defaultValue, key.name, store: key.suite)
+	}
+
+	// Add more overloads as needed
+}
+
+extension AppStorage where Value: ExpressibleByNilLiteral {
+	// swiftlint:disable:next discouraged_optional_boolean
+	init(_ key: Defaults.Key<Value>) where Value == Bool? {
+		self.init(key.name, store: key.suite)
+	}
+
+	init(_ key: Defaults.Key<Value>) where Value == String? {
+		self.init(key.name, store: key.suite)
+	}
+}
+
+
+private struct EmptyStateTextModifier: ViewModifier {
+	func body(content: Content) -> some View {
+		content
+			.font(.title2)
+			.foregroundColor(.secondary)
+	}
+}
+
+extension View {
+	/// For empty states in the UI. For example, no items in a list, no search results, etc.
+	func emptyStateTextStyle() -> some View {
+		modifier(EmptyStateTextModifier())
+	}
+}
+
+
+extension View {
+	/// Fill the frame.
+	func fillFrame(
+		_ axis: Axis.Set = [.horizontal, .vertical],
+		alignment: Alignment = .center
+	) -> some View {
+		frame(
+			maxWidth: axis.contains(.horizontal) ? .infinity : nil,
+			maxHeight: axis.contains(.vertical) ? .infinity : nil,
+			alignment: alignment
+		)
+	}
+}
+
+
+extension Data {
+	/// Detect whether the data is RTF.
+	var isRtf: Bool {
+		guard count > 6 else {
+			return false
+		}
+
+		return [UInt8](self)[0..<6] == [0x7B, 0x5C, 0x72, 0x74, 0x66, 0x31]
 	}
 }

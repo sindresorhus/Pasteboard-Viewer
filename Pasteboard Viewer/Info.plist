@@ -28,10 +28,6 @@
 	<string>clipboard,nspasteboard,copy,paste</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>MIT License © Sindre Sorhus</string>
-	<key>NSMainStoryboardFile</key>
-	<string>Main</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
 	<key>NSSupportsAutomaticTermination</key>
 	<true/>
 	<key>NSSupportsSuddenTermination</key>

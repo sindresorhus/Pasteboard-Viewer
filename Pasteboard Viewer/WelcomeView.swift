@@ -1,15 +1,21 @@
 import Cocoa
 
-extension AppDelegate {
+// TODO: Make a proper welcome window.
+
+extension AppMain {
 	func showWelcomeScreenIfNeeded() {
 		guard SSApp.isFirstLaunch else {
 			return
 		}
 
+		NSApp.activate(ignoringOtherApps: true)
+
+		// TODO: Remove the crash warning at some point.
+
 		NSAlert.showModal(
 			for: window,
-			message: "Welcome to Pasteboard Viewer!",
-			informativeText:
+			title: "Welcome to Pasteboard Viewer!",
+			message:
 				"""
 				Please note that Pasteboard Viewer can sometimes crash. This is a macOS bug that I cannot work around.
 
@@ -23,10 +29,10 @@ extension AppDelegate {
 
 		NSAlert.showModal(
 			for: window,
-			message: "Feedback Welcome 🙌🏻",
-			informativeText:
+			title: "Feedback Welcome",
+			message:
 				"""
-				If you have any feedback, bug reports, or feature requests, kindly use the “Send Feedback” button in the “Help” menu. I respond to all submissions. It's preferable that you report bugs this way rather than as an App Store review, since the App Store will not allow me to contact you for more information.
+				If you have any feedback, bug reports, or feature requests, use the feedback button in the “Help” menu. I quickly respond to all submissions.
 				""",
 			buttonTitles: [
 				"Get Started"
