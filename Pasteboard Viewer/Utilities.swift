@@ -788,8 +788,7 @@ extension QuickLookPreview {
 		}
 
 		let url = temporaryDirectory
-			.appendingPathComponent("data", isDirectory: false)
-			.appendingPathExtension(for: contentType)
+			.appendingPathComponent("data", conformingTo: contentType)
 
 		guard (try? data.write(to: url)) != nil else {
 			return nil
@@ -1093,20 +1092,6 @@ extension View {
 }
 
 
-struct ToggleSidebarToolbarItem: ToolbarContent {
-	var body: some ToolbarContent {
-		ToolbarItem(placement: .automatic) {
-			Button {
-				NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
-			} label: {
-				Image(systemName: "sidebar.left")
-			}
-				.help("Toggle Sidebar")
-		}
-	}
-}
-
-
 extension AppStorage {
 	init(_ key: Defaults.Key<Value>) where Value == Bool {
 		self.init(wrappedValue: key.defaultValue, key.name, store: key.suite)
@@ -1171,4 +1156,59 @@ extension Data {
 
 		return [UInt8](self)[0..<6] == [0x7B, 0x5C, 0x72, 0x74, 0x66, 0x31]
 	}
+}
+
+
+extension Double {
+	/**
+	Converts the number to a string and strips fractional trailing zeros.
+	```
+	print(1.0)
+	//=> "1.0"
+
+	print(1.0.formatted)
+	//=> "1"
+
+	print(0.0100.formatted)
+	//=> "0.01"
+	```
+	*/
+	var formatted: String {
+		truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", self) : String(self)
+	}
+}
+
+extension CGFloat {
+	var formatted: String { Double(self).formatted }
+}
+
+extension CGSize {
+	/// Example: `140×100`
+	var formatted: String { "\(width.formatted)×\(height.formatted)" }
+}
+
+
+extension StringProtocol {
+	func lineCount() -> Int {
+		var count = 0
+		enumerateLines { _, _ in
+			count += 1
+		}
+
+		return count
+	}
+}
+
+
+extension URL {
+	/// Show the URL (file or directory) in Finder by selecting it.
+	func showInFinder() {
+		NSWorkspace.shared.activateFileViewerSelecting([resolvingSymlinksInPath()])
+	}
+}
+
+
+extension StringProtocol {
+	/// Convert a string URL to a `URL` type.
+	var toURL: URL? { URL(string: String(self)) }
 }

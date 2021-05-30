@@ -1,6 +1,30 @@
 import SwiftUI
 import Combine
 
+private struct SidebarItemView: View {
+	let type: Pasteboard.Type_
+
+	var body: some View {
+		Text(type.title)
+			.contextMenu {
+				Button("Copy Type Identifier") {
+					// TODO: Pause realtime pasteboard view here when we support that.
+					type.nsType.rawValue.copyToPasteboard()
+				}
+				Divider()
+				if type.nsType == .fileURL {
+					Button("Show in Finder") {
+						type.string()?.toURL?.showInFinder()
+					}
+				} else if type.nsType == .URL {
+					Button("Open in Browser") {
+						type.string()?.toURL?.open()
+					}
+				}
+			}
+	}
+}
+
 struct ContentView: View {
 	@StateObject private var pasteboardObservable = NSPasteboard.Observable(.general)
 	@State private var selectedPasteboard = Pasteboard.general
@@ -39,14 +63,8 @@ struct ContentView: View {
 			List(selection: $selectedType) {
 				ForEach(selectedPasteboard.items.indexed(), id: \.1) { index, item in
 					Section(header: Text("Item \(index + 1)")) {
-						ForEach(item.types, id: \.self) { type in
-							Text(type.title)
-								.contextMenu {
-									Button("Copy Type Identifier") {
-										// TODO: Pause realtime pasteboard view here when we support that.
-										type.nsType.rawValue.copyToPasteboard()
-									}
-								}
+						ForEach(item.types, id: \.self) {
+							SidebarItemView(type: $0)
 						}
 					}
 				}
@@ -60,28 +78,23 @@ struct ContentView: View {
 			// .frame(minWidth: 180, idealWidth: 200, maxWidth: 300)
 			.frame(minWidth: 200, maxWidth: 300)
 			.toolbar {
-				// TODO: Remove this when SwiftUI support preventing the sidebar from being hidden.
-				ToggleSidebarToolbarItem()
-			}
-	}
-
-	private var mainContent: some View {
-		Group {
-			if let type = selectedType {
-				PasteboardContentsView(type: type)
-					.environmentObject(pasteboardObservable)
-			} else {
-				Text("No Pasteboard Items")
-					.emptyStateTextStyle()
-			}
-		}
-			.toolbar {
 				ToolbarItem(placement: .primaryAction) {
 					EnumPicker("Pasteboard", enumBinding: $selectedPasteboard) { pasteboard, _ in
 						Text(pasteboard.nsPasteboard.presentableName)
 					}
 				}
 			}
+	}
+
+	@ViewBuilder
+	private var mainContent: some View {
+		if let type = selectedType {
+			PasteboardContentsView(type: type)
+				.environmentObject(pasteboardObservable)
+		} else {
+			Text("No Pasteboard Items")
+				.emptyStateTextStyle()
+		}
 	}
 
 	var body: some View {
@@ -91,7 +104,6 @@ struct ContentView: View {
 			mainContent
 		}
 			.frame(minWidth: 500, minHeight: 300)
-			.navigationSubtitle(selectedType?.title ?? "")
 			.onChange(of: selectedPasteboard) {
 				pasteboardObservable.pasteboard = $0.nsPasteboard
 				selectedType = $0.firstType

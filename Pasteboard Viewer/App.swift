@@ -21,6 +21,8 @@ struct AppMain: App {
 				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 11.3)
 		}
 			.commands {
+				// TODO: Remove this when SwiftUI support preventing the sidebar from being hidden.
+				SidebarCommands()
 				CommandGroup(replacing: .newItem) {}
 				CommandGroup(after: .windowSize) {
 					Toggle("Stay On Top", isOn: $stayOnTop)
