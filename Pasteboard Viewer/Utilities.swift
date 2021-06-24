@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 import Quartz
 import UniformTypeIdentifiers
+import StoreKit
 import Defaults
 
 
@@ -456,13 +457,6 @@ private struct ForceFocusView: NSViewRepresentable {
 	func updateNSView(_ nsView: NSViewType, context: Context) {}
 }
 
-private struct ForceFocusModifier: ViewModifier {
-	func body(content: Content) -> some View {
-		content
-			.background(ForceFocusView())
-	}
-}
-
 extension View {
 	/**
 	Force the focus on a view once.
@@ -470,7 +464,7 @@ extension View {
 	This can be useful as a workaround for SwiftUI's focus issues, for example, the sidebar not getting initial focus.
 	*/
 	func forceFocus() -> some View {
-		modifier(ForceFocusModifier())
+		background(ForceFocusView())
 	}
 }
 
@@ -1033,6 +1027,7 @@ private struct WindowViewModifier: ViewModifier {
 	let onWindow: (NSWindow?) -> Void
 
 	func body(content: Content) -> some View {
+		// We're intentionally not using `.onChange` as we need it to execute for every SwiftUI change as the window properties can be changed at any time by SwiftUI.
 		onWindow(window)
 
 		return content
@@ -1062,24 +1057,6 @@ extension View {
 }
 
 
-private struct OnChangeWithInitial<Value: Equatable>: ViewModifier {
-	let value: Value
-	let initial: Bool
-	let action: (Value) -> Void
-
-	func body(content: Content) -> some View {
-		content
-			.onChange(of: value, perform: action)
-			.onAppear {
-				guard initial else {
-					return
-				}
-
-				action(value)
-			}
-	}
-}
-
 extension View {
 	/// `.onChange` version that allows triggering initially (on appear) too, not just on change.
 	func onChange<V: Equatable>(
@@ -1087,7 +1064,14 @@ extension View {
 		initial: Bool,
 		perform action: @escaping (V) -> Void
 	) -> some View {
-		modifier(OnChangeWithInitial(value: value, initial: initial, action: action))
+		onChange(of: value, perform: action)
+			.onAppear {
+				guard initial else {
+					return
+				}
+
+				action(value)
+			}
 	}
 }
 
@@ -1116,18 +1100,11 @@ extension AppStorage where Value: ExpressibleByNilLiteral {
 }
 
 
-private struct EmptyStateTextModifier: ViewModifier {
-	func body(content: Content) -> some View {
-		content
-			.font(.title2)
-			.foregroundColor(.secondary)
-	}
-}
-
 extension View {
 	/// For empty states in the UI. For example, no items in a list, no search results, etc.
 	func emptyStateTextStyle() -> some View {
-		modifier(EmptyStateTextModifier())
+		font(.title2)
+			.foregroundColor(.secondary)
 	}
 }
 
@@ -1211,4 +1188,42 @@ extension URL {
 extension StringProtocol {
 	/// Convert a string URL to a `URL` type.
 	var toURL: URL? { URL(string: String(self)) }
+}
+
+
+extension Numeric {
+	mutating func increment(by value: Self = 1) -> Self {
+		self += value
+		return self
+	}
+
+	mutating func decrement(by value: Self = 1) -> Self {
+		self -= value
+		return self
+	}
+
+	func incremented(by value: Self = 1) -> Self {
+		self + value
+	}
+
+	func decremented(by value: Self = 1) -> Self {
+		self - value
+	}
+}
+
+
+extension SSApp {
+	private static let key = Defaults.Key("SSApp_requestReview", default: 0)
+
+	/// Requests a review only after this method has been called the given amount of times.
+	static func requestReviewAfterBeingCalledThisManyTimes(_ counts: [Int]) {
+		guard
+			!SSApp.isFirstLaunch,
+			counts.contains(Defaults[key].increment())
+		else {
+			return
+		}
+
+		SKStoreReviewController.requestReview()
+	}
 }

@@ -25,6 +25,7 @@ struct AppMain: App {
 				SidebarCommands()
 				CommandGroup(replacing: .newItem) {}
 				CommandGroup(after: .windowSize) {
+					// TODO: Use Defaults.Toggle
 					Toggle("Stay On Top", isOn: $stayOnTop)
 				}
 				CommandGroup(replacing: .help) {
