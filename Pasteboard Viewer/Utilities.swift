@@ -561,10 +561,16 @@ extension Window {
 			return false
 		}
 
+		// You might think that we could simply skip windows that are `window.owner.app?.activationPolicy != .regular`, but menu bar apps are `.accessory`, and they might be the source of some copied data.
+		guard !window.owner.name.lowercased().hasSuffix("agent") else {
+			return false
+		}
+
 		let appIgnoreList = [
 			"com.apple.dock",
 			"com.apple.notificationcenterui",
 			"com.apple.screencaptureui",
+			"com.apple.PIPAgent",
 			"com.sindresorhus.Pasteboard-Viewer"
 		]
 
