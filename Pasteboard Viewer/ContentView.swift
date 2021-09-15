@@ -71,7 +71,7 @@ struct ContentView: View {
 					// Works around the sidebar not getting focus at launch.
 					.forceFocus()
 			}
-				.listStyle(SidebarListStyle())
+				.listStyle(.sidebar)
 			sourceAppView
 		}
 			// TODO: Use this when SwiftUI is able to persist the sidebar size.

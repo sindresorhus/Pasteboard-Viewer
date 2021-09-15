@@ -538,7 +538,7 @@ extension Window {
 
 	/// Filters out fully transparent windows and windows smaller than 50 width or height.
 	static func defaultFilter(window: Self) -> Bool {
-		let minimumWindowSize: CGFloat = 50
+		let minimumWindowSize = 50.0
 
 		// Skip windows outside the expected level range.
 		guard
@@ -1161,13 +1161,10 @@ extension Double {
 	}
 }
 
-extension CGFloat {
-	var formatted: String { Double(self).formatted }
-}
 
 extension CGSize {
 	/// Example: `140×100`
-	var formatted: String { "\(width.formatted)×\(height.formatted)" }
+	var formatted: String { "\(Double(width).formatted)×\(Double(height).formatted)" }
 }
 
 
