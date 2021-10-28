@@ -42,7 +42,7 @@ struct PasteboardContentsView: View {
 					.navigationSubtitle(textSubtitle(string))
 			} else if
 				let data = data,
-				let view = QuickLookPreview(data: data, contentType: type.nsType.toUTType ?? .text)
+				let view = QuickLookPreview(data: data, contentType: type.nsType.toUTType ?? .plainText)
 			{
 				view
 					.background(Color(.textBackgroundColor))
