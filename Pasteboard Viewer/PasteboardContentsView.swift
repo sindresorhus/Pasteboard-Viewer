@@ -45,7 +45,7 @@ struct PasteboardContentsView: View {
 				let view = QuickLookPreview(data: data, contentType: type.nsType.toUTType ?? .text)
 			{
 				view
-					.background(Color(NSColor.textBackgroundColor))
+					.background(Color(.textBackgroundColor))
 					.navigationSubtitle(sizeString)
 			} else if let data = data {
 				ScrollableTextView(

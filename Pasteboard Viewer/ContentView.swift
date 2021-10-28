@@ -38,12 +38,7 @@ struct ContentView: View {
 			let appName = NSWorkspace.shared.appName(forURL: appURL)
 		{
 			VStack(alignment: .leading) {
-				Section(
-					header: Text("Source")
-						.foregroundColor(.secondary)
-						.font(.subheadline)
-						.fontWeight(.semibold)
-				) {
+				Section {
 					HStack(spacing: 0) {
 						URLIcon(url: appURL)
 							.frame(height: 18)
@@ -51,6 +46,11 @@ struct ContentView: View {
 							.lineLimit(1)
 							.padding(.leading, 4)
 					}
+				} header: {
+					Text("Source")
+						.foregroundColor(.secondary)
+						.font(.subheadline)
+						.fontWeight(.semibold)
 				}
 			}
 				.padding()
@@ -62,10 +62,12 @@ struct ContentView: View {
 		VStack(alignment: .leading) {
 			List(selection: $selectedType) {
 				ForEach(selectedPasteboard.items.indexed(), id: \.1) { index, item in
-					Section(header: Text("Item \(index + 1)")) {
+					Section {
 						ForEach(item.types, id: \.self) {
 							SidebarItemView(type: $0)
 						}
+					} header: {
+						Text("Item \(index + 1)")
 					}
 				}
 					// Works around the sidebar not getting focus at launch.

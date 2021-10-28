@@ -29,7 +29,7 @@ Tip: Right-click an item in the sidebar to copy the type identifier.
 
 Requires macOS 11 or later.
 
-*[Last macOS 10.15 compatible version.](https://github.com/sindresorhus/Pasteboard-Viewer/releases/tag/v1.5.1)*
+*[Last macOS 10.15 compatible version.](https://github.com/sindresorhus/Pasteboard-Viewer/releases/tag/v1.5.1) (1.5.1)*
 
 ## Screenshot
 
