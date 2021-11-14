@@ -66,7 +66,9 @@ extension NSPasteboardItem {
 		"NSColor pasteboard type": "com.apple.cocoa.pasteboard.color"
 	]
 
-	/// `.types` without legacy junk.
+	/**
+	`.types` without legacy junk.
+	*/
 	var modernTypes: [NSPasteboard.PasteboardType] {
 		guard !types.isEmpty else {
 			return []

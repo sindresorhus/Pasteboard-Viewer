@@ -53,8 +53,10 @@ enum SSApp {
 }
 
 
-/// Convenience for opening URLs.
 extension URL {
+	/**
+	Convenience for opening URLs.
+	*/
 	func open() {
 		NSWorkspace.shared.open(self)
 	}
@@ -399,8 +401,11 @@ struct ScrollableAttributedTextView: NSViewRepresentable {
 
 
 extension View {
-	/// Returns a type-erased version of `self`.
-	/// - Important: Use `Group` instead whenever possible!
+	/**
+	Returns a type-erased version of `self`.
+
+	- Important: Use `Group` instead whenever possible!
+	*/
 	func eraseToAnyView() -> AnyView {
 		AnyView(self)
 	}
@@ -408,7 +413,9 @@ extension View {
 
 
 extension NSPasteboard {
-	/// Human-readable name of the pasteboard.
+	/**
+	Human-readable name of the pasteboard.
+	*/
 	var presentableName: String {
 		switch name {
 		case .general:
@@ -475,7 +482,9 @@ extension BinaryInteger {
 
 
 extension NSRunningApplication {
-	/// Like `.localizedName` but guaranteed to return something useful even if the name is not available.
+	/**
+	Like `.localizedName` but guaranteed to return something useful even if the name is not available.
+	*/
 	var localizedTitle: String {
 		localizedName
 			?? executableURL?.deletingPathExtension().lastPathComponent
@@ -487,8 +496,11 @@ extension NSRunningApplication {
 }
 
 
-/// Static representation of a window.
-/// - Note: The `name` property is always `nil` on macOS 10.15 and later unless you request “Screen Recording” permission.
+/**
+Static representation of a window.
+
+- Note: The `name` property is always `nil` on macOS 10.15 and later unless you request “Screen Recording” permission.
+*/
 struct Window {
 	struct Owner {
 		let name: String
@@ -509,7 +521,9 @@ struct Window {
 	let sharingState: CGWindowSharingType // https://stackoverflow.com/questions/27695742/what-does-kcgwindowsharingstate-actually-do
 	let isOnScreen: Bool
 
-	/// Accepts a window dictionary coming from `CGWindowListCopyWindowInfo`.
+	/**
+	Accepts a window dictionary coming from `CGWindowListCopyWindowInfo`.
+	*/
 	private init(windowDictionary window: [String: Any]) {
 		self.identifier = window[kCGWindowNumber as String] as! CGWindowID
 		self.name = window[kCGWindowName as String] as? String
@@ -536,7 +550,9 @@ struct Window {
 extension Window {
 	typealias Filter = (Self) -> Bool
 
-	/// Filters out fully transparent windows and windows smaller than 50 width or height.
+	/**
+	Filters out fully transparent windows and windows smaller than 50 width or height.
+	*/
 	static func defaultFilter(window: Self) -> Bool {
 		let minimumWindowSize = 50.0
 
@@ -643,22 +659,33 @@ extension NSPasteboard.PasteboardType {
 }
 
 extension NSPasteboard {
-	/// Information about the pasteboard contents.
+	/**
+	Information about the pasteboard contents.
+	*/
 	struct ContentsInfo: Equatable, Identifiable {
 		let id = UUID()
 
-		/// The date when the current pasteboard data was added.
+		/**
+		The date when the current pasteboard data was added.
+		*/
 		let created = Date()
 
-		/// The bundle identifier of the app that put the data on the pasteboard.
+		/**
+		The bundle identifier of the app that put the data on the pasteboard.
+		*/
 		let sourceAppBundleIdentifier: String?
 
-		/// The URL of the app that put the data on the pasteboard.
-		/// - Note: Don't assume this is non-optional if `sourceAppBundleIdentifier` is.
+		/**
+		The URL of the app that put the data on the pasteboard.
+
+		- Note: Don't assume this is non-optional if `sourceAppBundleIdentifier` is.
+		*/
 		let sourceAppURL: URL?
 	}
 
-	/// Returns a publisher that emits when the pasteboard changes.
+	/**
+	Returns a publisher that emits when the pasteboard changes.
+	*/
 	var publisher: AnyPublisher<ContentsInfo, Never> {
 		var isFirst = true
 
@@ -712,7 +739,9 @@ extension NSPasteboard {
 }
 
 extension NSPasteboard {
-	/// An observable object that publishes updates when the given pasteboard changes.
+	/**
+	An observable object that publishes updates when the given pasteboard changes.
+	*/
 	final class Observable: ObservableObject {
 		private var cancellable: AnyCancellable?
 
@@ -749,7 +778,9 @@ struct QuickLookPreview: NSViewRepresentable {
 		nsView.close()
 	}
 
-	/// The item to preview.
+	/**
+	The item to preview.
+	*/
 	let previewItem: QLPreviewItem
 
 	func makeNSView(context: Context) -> NSViewType {
@@ -764,7 +795,9 @@ struct QuickLookPreview: NSViewRepresentable {
 }
 
 extension QuickLookPreview {
-	/// - Note: The initializer will return `nil` if the URL is not a file URL.
+	/**
+	- Note: The initializer will return `nil` if the URL is not a file URL.
+	*/
 	init?(url: URL) {
 		guard url.isFileURL else {
 			return nil
@@ -800,7 +833,9 @@ extension QuickLookPreview {
 
 
 extension NSPasteboard.PasteboardType {
-	/// Convert a pasteboard type to a `UTType`.
+	/**
+	Convert a pasteboard type to a `UTType`.
+	*/
 	var toUTType: UTType? { UTType(rawValue) }
 }
 
@@ -874,7 +909,9 @@ extension String {
 }
 
 
-/// Icon for a file/directory/bundle at the given URL.
+/**
+Icon for a file/directory/bundle at the given URL.
+*/
 struct URLIcon: View {
 	let url: URL
 
@@ -904,7 +941,9 @@ extension NSWorkspace {
 
 
 extension NSAlert {
-	/// Show an alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
+	/**
+	Show an alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
+	*/
 	@discardableResult
 	static func showModal(
 		for window: NSWindow? = nil,
@@ -924,8 +963,11 @@ extension NSAlert {
 			.runModal(for: window)
 	}
 
-	/// The index in the `buttonTitles` array for the button to use as default.
-	/// Set `-1` to not have any default. Useful for really destructive actions.
+	/**
+	The index in the `buttonTitles` array for the button to use as default.
+
+	Set `-1` to not have any default. Useful for really destructive actions.
+	*/
 	var defaultButtonIndex: Int {
 		get {
 			buttons.firstIndex { $0.keyEquivalent == "\r" } ?? -1
@@ -964,7 +1006,9 @@ extension NSAlert {
 		}
 	}
 
-	/// Runs the alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
+	/**
+	Runs the alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
+	*/
 	@discardableResult
 	func runModal(for window: NSWindow? = nil) -> NSApplication.ModalResponse {
 		guard let window = window else {
@@ -978,7 +1022,9 @@ extension NSAlert {
 		return NSApp.runModal(for: window)
 	}
 
-	/// Adds buttons with the given titles to the alert.
+	/**
+	Adds buttons with the given titles to the alert.
+	*/
 	func addButtons(withTitles buttonTitles: [String]) {
 		for buttonTitle in buttonTitles {
 			addButton(withTitle: buttonTitle)
@@ -1021,7 +1067,9 @@ private struct WindowAccessor: NSViewRepresentable {
 }
 
 extension View {
-	/// Bind the native backing-window of a SwiftUI window to a property.
+	/**
+	Bind the native backing-window of a SwiftUI window to a property.
+	*/
 	func bindNativeWindow(_ window: Binding<NSWindow?>) -> some View {
 		background(WindowAccessor(window))
 	}
@@ -1042,19 +1090,25 @@ private struct WindowViewModifier: ViewModifier {
 }
 
 extension View {
-	/// Access the native backing-window of a SwiftUI window.
+	/**
+	Access the native backing-window of a SwiftUI window.
+	*/
 	func accessNativeWindow(_ onWindow: @escaping (NSWindow?) -> Void) -> some View {
 		modifier(WindowViewModifier(onWindow: onWindow))
 	}
 
-	/// Set the window level of a SwiftUI window.
+	/**
+	Set the window level of a SwiftUI window.
+	*/
 	func windowLevel(_ level: NSWindow.Level) -> some View {
 		accessNativeWindow {
 			$0?.level = level
 		}
 	}
 
-	/// Set the window tabbing mode of a SwiftUI window.
+	/**
+	Set the window tabbing mode of a SwiftUI window.
+	*/
 	func windowTabbingMode(_ tabbingMode: NSWindow.TabbingMode) -> some View {
 		accessNativeWindow {
 			$0?.tabbingMode = tabbingMode
@@ -1064,7 +1118,9 @@ extension View {
 
 
 extension View {
-	/// `.onChange` version that allows triggering initially (on appear) too, not just on change.
+	/**
+	`.onChange` version that allows triggering initially (on appear) too, not just on change.
+	*/
 	func onChange<V: Equatable>(
 		of value: V,
 		initial: Bool,
@@ -1107,7 +1163,9 @@ extension AppStorage where Value: ExpressibleByNilLiteral {
 
 
 extension View {
-	/// For empty states in the UI. For example, no items in a list, no search results, etc.
+	/**
+	For empty states in the UI. For example, no items in a list, no search results, etc.
+	*/
 	func emptyStateTextStyle() -> some View {
 		font(.title2)
 			.foregroundColor(.secondary)
@@ -1116,7 +1174,9 @@ extension View {
 
 
 extension View {
-	/// Fill the frame.
+	/**
+	Fill the frame.
+	*/
 	func fillFrame(
 		_ axis: Axis.Set = [.horizontal, .vertical],
 		alignment: Alignment = .center
@@ -1131,7 +1191,9 @@ extension View {
 
 
 extension Data {
-	/// Detect whether the data is RTF.
+	/**
+	Detect whether the data is RTF.
+	*/
 	var isRtf: Bool {
 		guard count > 6 else {
 			return false
@@ -1163,7 +1225,9 @@ extension Double {
 
 
 extension CGSize {
-	/// Example: `140×100`
+	/**
+	Example: `140×100`
+	*/
 	var formatted: String { "\(Double(width).formatted)×\(Double(height).formatted)" }
 }
 
@@ -1181,7 +1245,9 @@ extension StringProtocol {
 
 
 extension URL {
-	/// Show the URL (file or directory) in Finder by selecting it.
+	/**
+	Show the URL (file or directory) in Finder by selecting it.
+	*/
 	func showInFinder() {
 		NSWorkspace.shared.activateFileViewerSelecting([resolvingSymlinksInPath()])
 	}
@@ -1189,7 +1255,9 @@ extension URL {
 
 
 extension StringProtocol {
-	/// Convert a string URL to a `URL` type.
+	/**
+	Convert a string URL to a `URL` type.
+	*/
 	var toURL: URL? { URL(string: String(self)) }
 }
 
@@ -1218,7 +1286,9 @@ extension Numeric {
 extension SSApp {
 	private static let key = Defaults.Key("SSApp_requestReview", default: 0)
 
-	/// Requests a review only after this method has been called the given amount of times.
+	/**
+	Requests a review only after this method has been called the given amount of times.
+	*/
 	static func requestReviewAfterBeingCalledThisManyTimes(_ counts: [Int]) {
 		guard
 			!SSApp.isFirstLaunch,
