@@ -105,7 +105,8 @@ struct ContentView: View {
 			sidebar
 			mainContent
 		}
-			.frame(minWidth: 500, minHeight: 300)
+			// TODO: Change the `minWidth` to `320` when the sidebar can be made unhidable.
+			.frame(minWidth: 240, minHeight: 120)
 			.onChange(of: selectedPasteboard) {
 				pasteboardObservable.pasteboard = $0.nsPasteboard
 				selectedType = $0.firstType
