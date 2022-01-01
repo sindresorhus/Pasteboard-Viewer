@@ -5,8 +5,7 @@ import Defaults
 struct AppMain: App {
 	@NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 	@StateObject private var appState = AppState()
-	// TODO: `@Default` doesn't update the state in the menu. Probably a macOS 11 bug. (macOS 11.3)
-	// @Default(.stayOnTop) private var stayOnTop
+	// TODO: Remove the below when targeting macOS 12.
 	@AppStorage(.stayOnTop) private var stayOnTop
 	@State var window: NSWindow? // swiftlint:disable:this swiftui_state_private
 
@@ -25,8 +24,11 @@ struct AppMain: App {
 				SidebarCommands()
 				CommandGroup(replacing: .newItem) {}
 				CommandGroup(after: .windowSize) {
-					// TODO: Use Defaults.Toggle
-					Toggle("Stay on Top", isOn: $stayOnTop)
+					if #available(macOS 12, *) {
+						Defaults.Toggle("Stay on Top", key: .stayOnTop)
+					} else {
+						Toggle("Stay on Top", isOn: $stayOnTop)
+					}
 				}
 				CommandGroup(replacing: .help) {
 					// TODO: `Link` doesn't yet work here. (macOS 11.3)
