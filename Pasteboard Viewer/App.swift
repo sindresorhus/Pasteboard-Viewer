@@ -26,7 +26,7 @@ struct AppMain: App {
 				CommandGroup(replacing: .newItem) {}
 				CommandGroup(after: .windowSize) {
 					// TODO: Use Defaults.Toggle
-					Toggle("Stay On Top", isOn: $stayOnTop)
+					Toggle("Stay on Top", isOn: $stayOnTop)
 				}
 				CommandGroup(replacing: .help) {
 					// TODO: `Link` doesn't yet work here. (macOS 11.3)

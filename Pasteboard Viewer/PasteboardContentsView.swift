@@ -23,6 +23,7 @@ struct PasteboardContentsView: View {
 				Image(nsImage: image)
 					.resizable()
 					.aspectRatio(contentMode: .fit)
+					.frame(maxWidth: image.size.width, maxHeight: image.size.height)
 					.navigationSubtitle("\(sizeString) — \(image.size.formatted)")
 			} else if
 				let data = data,
