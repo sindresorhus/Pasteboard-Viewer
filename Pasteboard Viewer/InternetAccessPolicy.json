@@ -4,7 +4,7 @@
 	"Website": "https://sindresorhus.com/pasteboard-viewer",
 	"Connections" : [
 		{
-			"Host" : "*.appcenter.ms",
+			"Host" : "*.sentry.io",
 			"NetworkProtocol" : "TCP",
 			"Port" : "443",
 			"Purpose" : "Pasteboard Viewer sends crash reports to this server.",

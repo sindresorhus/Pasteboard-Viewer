@@ -5,18 +5,18 @@ import Defaults
 struct AppMain: App {
 	@NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 	@StateObject private var appState = AppState()
-	// TODO: Remove the below when targeting macOS 12.
-	@AppStorage(.stayOnTop) private var stayOnTop
 	@State var window: NSWindow? // swiftlint:disable:this swiftui_state_private
 
 	var body: some Scene {
 		WindowGroup {
-			ContentView()
+			MainScreen()
 				.environmentObject(appState)
-				.onAppear(perform: onAppear)
+				.task {
+					DispatchQueue.main.async {
+						showWelcomeScreenIfNeeded()
+					}
+				}
 				.bindNativeWindow($window)
-				.windowTabbingMode(.disallowed)
-				.windowLevel(stayOnTop ? .floating : .normal)
 				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 12.1)
 		}
 			.commands {
@@ -24,24 +24,12 @@ struct AppMain: App {
 				SidebarCommands()
 				CommandGroup(replacing: .newItem) {}
 				CommandGroup(after: .windowSize) {
-					if #available(macOS 12, *) {
-						Defaults.Toggle("Stay on Top", key: .stayOnTop)
-					} else {
-						Toggle("Stay on Top", isOn: $stayOnTop)
-					}
+					Defaults.Toggle("Stay on Top", key: .stayOnTop)
 				}
 				CommandGroup(replacing: .help) {
-					// TODO: `Link` doesn't yet work here. (macOS 11.3)
-					// Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
-					Button("Website") {
-						"https://sindresorhus.com/pasteboard-viewer".openUrl()
-					}
-					Button("Rate on the App Store") {
-						"macappstore://apps.apple.com/app/id1499215709?action=write-review".openUrl()
-					}
-					Button("More Apps by Me") {
-						"macappstore://apps.apple.com/developer/id328077650".openUrl()
-					}
+					Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
+					Link("Rate on the App Store", destination: "macappstore://apps.apple.com/app/id1499215709?action=write-review")
+					Link("More Apps by Me", destination: "macappstore://apps.apple.com/developer/id328077650")
 					Divider()
 					Button("Send Feedback…") {
 						SSApp.openSendFeedbackPage()
@@ -49,14 +37,9 @@ struct AppMain: App {
 				}
 			}
 	}
-
-	private func onAppear() {
-		DispatchQueue.main.async {
-			showWelcomeScreenIfNeeded()
-		}
-	}
 }
 
+@MainActor
 private final class AppDelegate: NSObject, NSApplicationDelegate {
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 }

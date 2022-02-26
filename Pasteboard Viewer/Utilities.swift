@@ -435,47 +435,6 @@ extension NSPasteboard {
 }
 
 
-private struct ForceFocusView: NSViewRepresentable {
-	final class CocoaForceFocusView: NSView {
-		private var hasFocused = false
-
-		override func viewDidMoveToWindow() {
-			DispatchQueue.main.async {
-				// The second dispatch call prevents `AttributeGraph` warnings.
-				DispatchQueue.main.async { [self] in
-					guard
-						!hasFocused,
-						let window = window
-					else {
-						return
-					}
-
-					hasFocused = true
-					window.makeFirstResponder(self)
-				}
-			}
-		}
-	}
-
-	typealias NSViewType = CocoaForceFocusView
-
-	func makeNSView(context: Context) -> NSViewType { .init() }
-
-	func updateNSView(_ nsView: NSViewType, context: Context) {}
-}
-
-extension View {
-	/**
-	Force the focus on a view once.
-
-	This can be useful as a workaround for SwiftUI's focus issues, for example, the sidebar not getting initial focus.
-	*/
-	func forceFocus() -> some View {
-		background(ForceFocusView())
-	}
-}
-
-
 extension BinaryInteger {
 	var boolValue: Bool { self != 0 }
 }
@@ -530,7 +489,7 @@ struct Window {
 
 		let processIdentifier = window[kCGWindowOwnerPID as String] as! Int
 		let app = NSRunningApplication(processIdentifier: pid_t(processIdentifier))
-		// TODO: When MS AppCenter supports manually sending crash logs, send one here when `window[kCGWindowOwnerName as String]` is `nil` so I can figure out in what cases it would e `nil` and improve the logic.
+
 		self.owner = Owner(
 			name: window[kCGWindowOwnerName as String] as? String ?? app?.localizedTitle ?? "<Unknown>",
 			processIdentifier: processIdentifier,
@@ -635,6 +594,7 @@ extension Window {
 		guard
 			let app = (
 				allWindows()
+					// TODO: Use `.firstNonNil()` here when available.
 					.lazy
 					.compactMap { createApp($0.owner.app) }
 					.first
@@ -883,7 +843,7 @@ extension URL {
 
 extension String {
 	func copyToPasteboard() {
-		NSPasteboard.general.clearContents()
+		NSPasteboard.general.prepareForNewContents()
 		NSPasteboard.general.setString(self, forType: .string)
 		NSPasteboard.general.setString(SSApp.id, forType: .sourceAppBundleIdentifier)
 	}
@@ -930,11 +890,11 @@ extension NSWorkspace {
 	Get an app name from an app URL.
 
 	```
-	NSWorkspace.shared.appName(forURL: …)
+	NSWorkspace.shared.appName(for: …)
 	//=> "Lungo"
 	```
 	*/
-	func appName(forURL url: URL) -> String? {
+	func appName(for url: URL) -> String? {
 		url.localizedName?.removingSuffix(".app")
 	}
 }
@@ -1138,37 +1098,13 @@ extension View {
 }
 
 
-extension AppStorage {
-	init(_ key: Defaults.Key<Value>) where Value == Bool {
-		self.init(wrappedValue: key.defaultValue, key.name, store: key.suite)
-	}
-
-	init(_ key: Defaults.Key<Value>) where Value == String {
-		self.init(wrappedValue: key.defaultValue, key.name, store: key.suite)
-	}
-
-	// Add more overloads as needed
-}
-
-extension AppStorage where Value: ExpressibleByNilLiteral {
-	// swiftlint:disable:next discouraged_optional_boolean
-	init(_ key: Defaults.Key<Value>) where Value == Bool? {
-		self.init(key.name, store: key.suite)
-	}
-
-	init(_ key: Defaults.Key<Value>) where Value == String? {
-		self.init(key.name, store: key.suite)
-	}
-}
-
-
 extension View {
 	/**
 	For empty states in the UI. For example, no items in a list, no search results, etc.
 	*/
 	func emptyStateTextStyle() -> some View {
 		font(.title2)
-			.foregroundColor(.secondary)
+			.foregroundStyle(.secondary)
 	}
 }
 

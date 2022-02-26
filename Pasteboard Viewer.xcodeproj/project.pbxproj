@@ -9,15 +9,15 @@
 /* Begin PBXBuildFile section */
 		E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E31C294123FBE2FA00DF3442 /* Defaults */; };
 		E31C294423FBE32200DF3442 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C294323FBE32200DF3442 /* Constants.swift */; };
-		E337758A2486CB9200DBE2A0 /* AppCenterCrashes in Frameworks */ = {isa = PBXBuildFile; productRef = E33775892486CB9200DBE2A0 /* AppCenterCrashes */; };
 		E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */; };
-		E353C8B4256BE26800D08A09 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E353C8B3256BE26800D08A09 /* WelcomeView.swift */; };
+		E353C8B4256BE26800D08A09 /* WelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E353C8B3256BE26800D08A09 /* WelcomeScreen.swift */; };
+		E38A392227DC9FD900AD75D7 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E38A392127DC9FD900AD75D7 /* Sentry */; };
 		E3A7F1DD23F7DAD400CDF428 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DC23F7DAD400CDF428 /* App.swift */; };
-		E3A7F1DF23F7DAD400CDF428 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DE23F7DAD400CDF428 /* ContentView.swift */; };
+		E3A7F1DF23F7DAD400CDF428 /* MainScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DE23F7DAD400CDF428 /* MainScreen.swift */; };
 		E3A7F1E123F7DAD700CDF428 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3A7F1E023F7DAD700CDF428 /* Assets.xcassets */; };
 		E3A7F1E423F7DAD700CDF428 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3A7F1E323F7DAD700CDF428 /* Preview Assets.xcassets */; };
 		E3A7F20F23F7E36000CDF428 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F20E23F7E36000CDF428 /* Utilities.swift */; };
-		E3A7F21223F8498F00CDF428 /* PasteboardContentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F21123F8498F00CDF428 /* PasteboardContentsView.swift */; };
+		E3A7F21223F8498F00CDF428 /* ContentsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F21123F8498F00CDF428 /* ContentsScreen.swift */; };
 		E3BB8DC623FBDBCE007A3849 /* Pasteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3BB8DC523FBDBCE007A3849 /* Pasteboard.swift */; };
 		E3E4394225FDF97A000DE4B8 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E4394125FDF97A000DE4B8 /* AppState.swift */; };
 /* End PBXBuildFile section */
@@ -25,16 +25,16 @@
 /* Begin PBXFileReference section */
 		E31C294323FBE32200DF3442 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = InternetAccessPolicy.json; sourceTree = "<group>"; };
-		E353C8B3256BE26800D08A09 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		E353C8B3256BE26800D08A09 /* WelcomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeScreen.swift; sourceTree = "<group>"; };
 		E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pasteboard Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3A7F1DC23F7DAD400CDF428 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		E3A7F1DE23F7DAD400CDF428 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E3A7F1DE23F7DAD400CDF428 /* MainScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScreen.swift; sourceTree = "<group>"; };
 		E3A7F1E023F7DAD700CDF428 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E3A7F1E323F7DAD700CDF428 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E3A7F1E823F7DAD700CDF428 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E3A7F1E923F7DAD700CDF428 /* Pasteboard_Viewer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pasteboard_Viewer.entitlements; sourceTree = "<group>"; };
 		E3A7F20E23F7E36000CDF428 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
-		E3A7F21123F8498F00CDF428 /* PasteboardContentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardContentsView.swift; sourceTree = "<group>"; };
+		E3A7F21123F8498F00CDF428 /* ContentsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentsScreen.swift; sourceTree = "<group>"; };
 		E3BB8DC523FBDBCE007A3849 /* Pasteboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pasteboard.swift; sourceTree = "<group>"; };
 		E3E4394125FDF97A000DE4B8 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -45,7 +45,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */,
-				E337758A2486CB9200DBE2A0 /* AppCenterCrashes in Frameworks */,
+				E38A392227DC9FD900AD75D7 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,10 +75,10 @@
 				E3A7F1DC23F7DAD400CDF428 /* App.swift */,
 				E3E4394125FDF97A000DE4B8 /* AppState.swift */,
 				E31C294323FBE32200DF3442 /* Constants.swift */,
-				E3A7F1DE23F7DAD400CDF428 /* ContentView.swift */,
-				E3A7F21123F8498F00CDF428 /* PasteboardContentsView.swift */,
+				E3A7F1DE23F7DAD400CDF428 /* MainScreen.swift */,
+				E3A7F21123F8498F00CDF428 /* ContentsScreen.swift */,
 				E3BB8DC523FBDBCE007A3849 /* Pasteboard.swift */,
-				E353C8B3256BE26800D08A09 /* WelcomeView.swift */,
+				E353C8B3256BE26800D08A09 /* WelcomeScreen.swift */,
 				E3A7F20E23F7E36000CDF428 /* Utilities.swift */,
 				E3A7F1E023F7DAD700CDF428 /* Assets.xcassets */,
 				E3D883B124C898890001C032 /* Other */,
@@ -124,7 +124,7 @@
 			name = "Pasteboard Viewer";
 			packageProductDependencies = (
 				E31C294123FBE2FA00DF3442 /* Defaults */,
-				E33775892486CB9200DBE2A0 /* AppCenterCrashes */,
+				E38A392127DC9FD900AD75D7 /* Sentry */,
 			);
 			productName = "Pasteboard Viewer";
 			productReference = E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */;
@@ -156,7 +156,7 @@
 			mainGroup = E3A7F1D023F7DAD400CDF428;
 			packageReferences = (
 				E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */,
-				E33775882486CB9200DBE2A0 /* XCRemoteSwiftPackageReference "appcenter-sdk-apple" */,
+				E38A392027DC9FD900AD75D7 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			productRefGroup = E3A7F1DA23F7DAD400CDF428 /* Products */;
 			projectDirPath = "";
@@ -208,13 +208,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				E3A7F20F23F7E36000CDF428 /* Utilities.swift in Sources */,
-				E3A7F21223F8498F00CDF428 /* PasteboardContentsView.swift in Sources */,
+				E3A7F21223F8498F00CDF428 /* ContentsScreen.swift in Sources */,
 				E3BB8DC623FBDBCE007A3849 /* Pasteboard.swift in Sources */,
 				E3E4394225FDF97A000DE4B8 /* AppState.swift in Sources */,
-				E3A7F1DF23F7DAD400CDF428 /* ContentView.swift in Sources */,
+				E3A7F1DF23F7DAD400CDF428 /* MainScreen.swift in Sources */,
 				E3A7F1DD23F7DAD400CDF428 /* App.swift in Sources */,
 				E31C294423FBE32200DF3442 /* Constants.swift in Sources */,
-				E353C8B4256BE26800D08A09 /* WelcomeView.swift in Sources */,
+				E353C8B4256BE26800D08A09 /* WelcomeScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,7 +272,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -327,7 +327,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -417,15 +417,15 @@
 			repositoryURL = "https://github.com/sindresorhus/Defaults";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 6.1.0;
+				minimumVersion = 6.2.0;
 			};
 		};
-		E33775882486CB9200DBE2A0 /* XCRemoteSwiftPackageReference "appcenter-sdk-apple" */ = {
+		E38A392027DC9FD900AD75D7 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/microsoft/appcenter-sdk-apple";
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 4.4.1;
+				minimumVersion = 7.10.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -436,10 +436,10 @@
 			package = E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */;
 			productName = Defaults;
 		};
-		E33775892486CB9200DBE2A0 /* AppCenterCrashes */ = {
+		E38A392127DC9FD900AD75D7 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E33775882486CB9200DBE2A0 /* XCRemoteSwiftPackageReference "appcenter-sdk-apple" */;
-			productName = AppCenterCrashes;
+			package = E38A392027DC9FD900AD75D7 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

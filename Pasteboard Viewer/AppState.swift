@@ -1,11 +1,14 @@
-import Combine
-import AppCenter
-import AppCenterCrashes
+import SwiftUI
+import Sentry
 
+@MainActor
 final class AppState: ObservableObject {
 	init() {
 		setUpConfig()
-		DispatchQueue.main.async(execute: didLaunch)
+
+		DispatchQueue.main.async { [self] in
+			didLaunch()
+		}
 	}
 
 	private func didLaunch() {
@@ -19,11 +22,11 @@ final class AppState: ObservableObject {
 			]
 		)
 
-		AppCenter.start(
-			withAppSecret: "3da13331-e82c-4245-b7fa-023424c17f16",
-			services: [
-				Crashes.self
-			]
-		)
+		#if !DEBUG
+		SentrySDK.start {
+			$0.dsn = "https://ded0fb3f6f7e4f0ca1f06048bfc26d57@o844094.ingest.sentry.io/6255818"
+			$0.enableSwizzling = false
+		}
+		#endif
 	}
 }

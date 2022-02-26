@@ -1,13 +1,13 @@
 import SwiftUI
 
-struct PasteboardContentsView: View {
+struct ContentsScreen: View {
 	@EnvironmentObject private var pasteboardObservable: NSPasteboard.Observable
 
 	let type: Pasteboard.Type_
 
 	var body: some View {
 		let data = type.data()
-		let sizeString = ByteCountFormatter.string(fromByteCount: Int64(data?.count ?? 0), countStyle: .file)
+		let sizeString = (data?.count ?? 0).formatted(.byteCount(style: .file))
 
 		func textSubtitle(_ string: String) -> String {
 			let lineCount = string.lineCount()
@@ -15,8 +15,28 @@ struct PasteboardContentsView: View {
 			return "\(sizeString) — \(lineCount) \(suffix)"
 		}
 
+		func renderString(_ string: String) -> some View {
+			ScrollableTextView(
+				text: .constant(string),
+				borderType: .noBorder
+			)
+				.navigationSubtitle(textSubtitle(string))
+		}
+
 		return Group {
+			// Ensure plain text is always rendered as plain text.
 			if
+				type.nsType.toUTType?.conforms(to: .plainText) == true,
+				let string = type.string()
+			{
+				renderString(string)
+			} else if
+				type.nsType.toUTType?.conforms(to: .utf16ExternalPlainText) == true,
+				let data = type.data(),
+				let string = String(data: data, encoding: .utf16)
+			{
+				renderString(string)
+			} else if
 				let data = data,
 				let image = NSImage(data: data)
 			{
@@ -36,17 +56,12 @@ struct PasteboardContentsView: View {
 				)
 					.navigationSubtitle(textSubtitle(attributedString.string))
 			} else if let string = type.string() {
-				ScrollableTextView(
-					text: .constant(string),
-					borderType: .noBorder
-				)
-					.navigationSubtitle(textSubtitle(string))
+				renderString(string)
 			} else if
 				let data = data,
 				let view = QuickLookPreview(data: data, contentType: type.nsType.toUTType ?? .plainText)
 			{
 				view
-					.background(Color(.textBackgroundColor))
 					.navigationSubtitle(sizeString)
 			} else if let data = data {
 				ScrollableTextView(
@@ -59,6 +74,7 @@ struct PasteboardContentsView: View {
 					.emptyStateTextStyle()
 			}
 		}
+			.background(.background)
 			.fillFrame()
 			.navigationTitle(type.title)
 	}

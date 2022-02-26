@@ -28,9 +28,5 @@
 	<string>clipboard,nspasteboard,copy,paste</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>MIT License © Sindre Sorhus</string>
-	<key>NSSupportsAutomaticTermination</key>
-	<true/>
-	<key>NSSupportsSuddenTermination</key>
-	<true/>
 </dict>
 </plist>
