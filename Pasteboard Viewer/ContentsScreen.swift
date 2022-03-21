@@ -8,6 +8,7 @@ struct ContentsScreen: View {
 	var body: some View {
 		let data = type.data()
 		let sizeString = (data?.count ?? 0).formatted(.byteCount(style: .file))
+		let contentType = type.nsType.toUTType
 
 		func textSubtitle(_ string: String) -> String {
 			let lineCount = string.lineCount()
@@ -26,12 +27,12 @@ struct ContentsScreen: View {
 		return Group {
 			// Ensure plain text is always rendered as plain text.
 			if
-				type.nsType.toUTType?.conforms(to: .plainText) == true,
+				contentType?.conforms(to: .plainText) == true,
 				let string = type.string()
 			{
 				renderString(string)
 			} else if
-				type.nsType.toUTType?.conforms(to: .utf16ExternalPlainText) == true,
+				contentType?.conforms(to: .utf16ExternalPlainText) == true,
 				let data = type.data(),
 				let string = String(data: data, encoding: .utf16)
 			{
@@ -44,11 +45,11 @@ struct ContentsScreen: View {
 					.resizable()
 					.aspectRatio(contentMode: .fit)
 					.frame(maxWidth: image.size.width, maxHeight: image.size.height)
-					.navigationSubtitle("\(sizeString) — \(image.size.formatted)")
+					.navigationSubtitle("\(sizeString) — \(image.pixelSize.formatted)")
 			} else if
 				let data = data,
-				data.isRtf, // The below initializer is too lenient with non-RTF data.
-				let attributedString = NSAttributedString(rtf: data, documentAttributes: nil)
+				data.isRtf || contentType?.conforms(to: .rtfd) == true || contentType?.conforms(to: .flatRTFD) == true, // The below initializer is too lenient with non-RTF data.
+				let attributedString = NSAttributedString(rtf: data, documentAttributes: nil) ?? NSAttributedString(rtfd: data, documentAttributes: nil)
 			{
 				ScrollableAttributedTextView(
 					attributedText: attributedString,
@@ -74,7 +75,6 @@ struct ContentsScreen: View {
 					.emptyStateTextStyle()
 			}
 		}
-			.background(.background)
 			.fillFrame()
 			.navigationTitle(type.title)
 	}

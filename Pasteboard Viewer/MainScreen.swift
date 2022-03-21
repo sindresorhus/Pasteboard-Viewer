@@ -13,14 +13,13 @@ private struct SidebarItemView: View {
 					type.nsType.rawValue.copyToPasteboard()
 				}
 				Divider()
-				let url = type.string()?.toURL
 				if type.nsType == .fileURL {
 					Button("Show in Finder") {
-						url?.showInFinder()
+						type.string()?.toURL?.showInFinder()
 					}
 				} else if type.nsType == .URL {
 					Button("Open in Browser") {
-						url?.open()
+						type.string()?.toURL?.open()
 					}
 				}
 			}
@@ -93,15 +92,14 @@ struct MainScreen: View {
 	private var sourceAppView: some View {
 		if
 			selectedPasteboard == .general,
-			let appURL = pasteboardObservable.info?.sourceAppURL,
-			let appName = NSWorkspace.shared.appName(for: appURL)
+			let appURL = pasteboardObservable.info?.sourceAppURL
 		{
 			VStack(alignment: .leading) {
 				Section {
 					HStack(spacing: 0) {
 						URLIcon(url: appURL)
 							.frame(height: 18)
-						Text(appName)
+						Text(NSWorkspace.shared.appName(for: appURL))
 							.lineLimit(1)
 							.padding(.leading, 4)
 					}

@@ -31,8 +31,8 @@ Requires macOS 11 or later.
 
 **Older versions**
 
-- *[Last macOS 11 compatible version](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.2.2/Pasteboard.Viewer.2.2.2.-.macOS.11.zip) (2.2.2)*
-- *[Last macOS 10.15 compatible version](https://github.com/sindresorhus/Pasteboard-Viewer/releases/tag/v1.5.1) (1.5.1)*
+- [Last macOS 11 compatible version](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.2.2/Pasteboard.Viewer.2.2.2.-.macOS.11.zip) *(2.2.2)*
+- [Last macOS 10.15 compatible version](https://github.com/sindresorhus/Pasteboard-Viewer/releases/tag/v1.5.1) *(1.5.1)*
 
 ## Screenshot
 

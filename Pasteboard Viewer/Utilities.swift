@@ -18,7 +18,7 @@ final class ObjectAssociation<T: Any> {
 
 
 enum SSApp {
-	static let id = Bundle.main.bundleIdentifier!
+	static let idString = Bundle.main.bundleIdentifier!
 	static let name = Bundle.main.object(forInfoDictionaryKey: kCFBundleNameKey as String) as! String
 	static let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
 	static let build = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as! String
@@ -38,13 +38,13 @@ enum SSApp {
 	static func openSendFeedbackPage() {
 		let metadata =
 			"""
-			\(SSApp.name) \(SSApp.versionWithBuild) - \(SSApp.id)
+			\(name) \(versionWithBuild) - \(idString)
 			macOS \(System.osVersion)
 			\(System.hardwareModel)
 			"""
 
 		let query: [String: String] = [
-			"product": SSApp.name,
+			"product": name,
 			"metadata": metadata
 		]
 
@@ -460,7 +460,7 @@ Static representation of a window.
 
 - Note: The `name` property is always `nil` on macOS 10.15 and later unless you request “Screen Recording” permission.
 */
-struct Window {
+struct WindowInfo {
 	struct Owner {
 		let name: String
 		let processIdentifier: Int
@@ -506,7 +506,7 @@ struct Window {
 	}
 }
 
-extension Window {
+extension WindowInfo {
 	typealias Filter = (Self) -> Bool
 
 	/**
@@ -565,7 +565,7 @@ extension Window {
 	}
 }
 
-extension Window {
+extension WindowInfo {
 	struct UserApp: Hashable, Identifiable {
 		let url: URL
 		let bundleIdentifier: String
@@ -672,7 +672,7 @@ extension NSPasteboard {
 						return nil
 					}
 
-					let app = Window.appOwningFrontmostWindow()
+					let app = WindowInfo.appOwningFrontmostWindow()
 
 					return ContentsInfo(
 						sourceAppBundleIdentifier: app?.bundleIdentifier,
@@ -837,7 +837,7 @@ extension URL {
 		return values.allValues[key] as? T
 	}
 
-	var localizedName: String? { resourceValue(forKey: .localizedNameKey) }
+	var localizedName: String { resourceValue(forKey: .localizedNameKey) ?? lastPathComponent }
 }
 
 
@@ -845,7 +845,7 @@ extension String {
 	func copyToPasteboard() {
 		NSPasteboard.general.prepareForNewContents()
 		NSPasteboard.general.setString(self, forType: .string)
-		NSPasteboard.general.setString(SSApp.id, forType: .sourceAppBundleIdentifier)
+		NSPasteboard.general.setString(SSApp.idString, forType: .sourceAppBundleIdentifier)
 	}
 }
 
@@ -853,7 +853,7 @@ extension String {
 extension String {
 	func removingSuffix(_ suffix: Self, caseSensitive: Bool = true) -> Self {
 		guard caseSensitive else {
-			guard let range = self.range(of: suffix, options: [.caseInsensitive, .anchored, .backwards]) else {
+			guard let range = range(of: suffix, options: [.caseInsensitive, .anchored, .backwards]) else {
 				return self
 			}
 
@@ -894,8 +894,8 @@ extension NSWorkspace {
 	//=> "Lungo"
 	```
 	*/
-	func appName(for url: URL) -> String? {
-		url.localizedName?.removingSuffix(".app")
+	func appName(for url: URL) -> String {
+		url.localizedName.removingSuffix(".app")
 	}
 }
 
@@ -1235,4 +1235,16 @@ extension SSApp {
 
 		SKStoreReviewController.requestReview()
 	}
+}
+
+
+extension CGImage {
+	var size: CGSize { CGSize(width: width, height: height) }
+}
+
+
+extension NSImage {
+	var cgImage: CGImage? { cgImage(forProposedRect: nil, context: nil, hints: nil) }
+
+	var pixelSize: CGSize { cgImage?.size ?? size }
 }
