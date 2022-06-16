@@ -8,14 +8,31 @@ enum Pasteboard: Equatable, CaseIterable {
 	case ruler
 
 	struct Type_: Hashable, Identifiable {
+		private static let ignoredIdentifiers: Set<String> = [
+			"com.apple.pasteboard.promised-suggested-file-name" // Trying to get the data/string of this type causes the app to hang indefinitely. (macOS 12.4)
+		]
+
 		let item: Item
 		let nsType: NSPasteboard.PasteboardType
 
 		var id: String { "\(item.id)-\(nsType.rawValue)" }
 		var title: String { nsType.rawValue }
 
-		func data() -> Data? { item.rawValue.data(forType: nsType) }
-		func string() -> String? { item.rawValue.string(forType: nsType) }
+		func data() -> Data? {
+			guard !Self.ignoredIdentifiers.contains(nsType.rawValue) else {
+				return nil
+			}
+
+			return item.rawValue.data(forType: nsType)
+		}
+
+		func string() -> String? {
+			guard !Self.ignoredIdentifiers.contains(nsType.rawValue) else {
+				return nil
+			}
+
+			return item.rawValue.string(forType: nsType)
+		}
 	}
 
 	struct Item: RawRepresentable, Hashable, Identifiable {
