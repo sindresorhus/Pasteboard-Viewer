@@ -27,7 +27,7 @@ Tip: Right-click an item in the sidebar to copy the type identifier.
 
 [![](https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/en-us?size=250x83&releaseDate=1615852800)](https://apps.apple.com/app/id1499215709)
 
-Requires macOS 11 or later.
+Requires macOS 12 or later.
 
 **Older versions**
 
