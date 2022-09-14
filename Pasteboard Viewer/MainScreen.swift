@@ -53,8 +53,8 @@ struct MainScreen: View {
 
 	@ViewBuilder
 	private var mainContent: some View {
-		if let type = selectedType {
-			ContentsScreen(type: type)
+		if let selectedType {
+			ContentsScreen(type: selectedType)
 				.environmentObject(pasteboardObservable)
 		} else {
 			Text("No Pasteboard Items")

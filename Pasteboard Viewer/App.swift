@@ -28,6 +28,7 @@ struct AppMain: App {
 				}
 				CommandGroup(replacing: .help) {
 					Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
+					Divider()
 					Link("Rate on the App Store", destination: "macappstore://apps.apple.com/app/id1499215709?action=write-review")
 					Link("More Apps by Me", destination: "macappstore://apps.apple.com/developer/id328077650")
 					Divider()

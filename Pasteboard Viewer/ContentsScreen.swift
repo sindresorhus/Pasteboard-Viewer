@@ -38,7 +38,7 @@ struct ContentsScreen: View {
 			{
 				renderString(string)
 			} else if
-				let data = data,
+				let data,
 				let image = NSImage(data: data)
 			{
 				Image(nsImage: image)
@@ -47,7 +47,7 @@ struct ContentsScreen: View {
 					.frame(maxWidth: image.size.width, maxHeight: image.size.height)
 					.navigationSubtitle("\(sizeString) — \(image.pixelSize.formatted)")
 			} else if
-				let data = data,
+				let data,
 				data.isRtf || contentType?.conforms(to: .rtfd) == true || contentType?.conforms(to: .flatRTFD) == true, // The below initializer is too lenient with non-RTF data.
 				let attributedString = NSAttributedString(rtf: data, documentAttributes: nil) ?? NSAttributedString(rtfd: data, documentAttributes: nil)
 			{
@@ -59,12 +59,12 @@ struct ContentsScreen: View {
 			} else if let string = type.string() {
 				renderString(string)
 			} else if
-				let data = data,
+				let data,
 				let view = QuickLookPreview(data: data, contentType: type.nsType.toUTType ?? .plainText)
 			{
 				view
 					.navigationSubtitle(sizeString)
-			} else if let data = data {
+			} else if let data {
 				ScrollableTextView(
 					text: .constant(String(describing: data)),
 					borderType: .noBorder

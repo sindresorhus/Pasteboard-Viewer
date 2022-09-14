@@ -4,9 +4,10 @@ import Quartz
 import UniformTypeIdentifiers
 import StoreKit
 import Defaults
+import Sentry
 
 
-final class ObjectAssociation<T: Any> {
+final class ObjectAssociation<T> {
 	subscript(index: AnyObject) -> T? {
 		get {
 			objc_getAssociatedObject(index, Unmanaged.passUnretained(self).toOpaque()) as! T?
@@ -48,7 +49,23 @@ enum SSApp {
 			"metadata": metadata
 		]
 
-		URL("https://sindresorhus.com/feedback/").addingDictionaryAsQuery(query).open()
+		URL("https://sindresorhus.com/feedback").addingDictionaryAsQuery(query).open()
+	}
+}
+
+
+extension SSApp {
+	/**
+	Initialize Sentry.
+	*/
+	static func initSentry(_ dsn: String) {
+		#if !DEBUG && canImport(Sentry)
+		SentrySDK.start {
+			$0.dsn = dsn
+			$0.enableSwizzling = false
+			$0.stitchAsyncCode = true
+		}
+		#endif
 	}
 }
 
@@ -259,11 +276,11 @@ struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatab
 }
 
 extension EnumPicker where Label == Text {
-	init<S>(
-		_ title: S,
+	init(
+		_ title: some StringProtocol,
 		enumBinding: Binding<Enum>,
 		@ViewBuilder content: @escaping (Enum, Bool) -> Content
-	) where S: StringProtocol {
+	) {
 		self.enumBinding = enumBinding
 		self.label = Text(title)
 		self.content = content
@@ -383,13 +400,13 @@ struct ScrollableAttributedTextView: NSViewRepresentable {
 		textView.isEditable = isEditable
 
 		if
-			let attributedText = attributedText,
+			let attributedText,
 			attributedText != textView.attributedString()
 		{
 			textView.textStorage?.setAttributedString(attributedText)
 		}
 
-		if let font = font {
+		if let font {
 			textView.font = font
 		}
 
@@ -581,9 +598,9 @@ extension WindowInfo {
 	static func appOwningFrontmostWindow() -> UserApp? {
 		func createApp(_ runningApp: NSRunningApplication?) -> UserApp? {
 			guard
-				let app = runningApp,
-				let url = app.bundleURL,
-				let bundleIdentifier = app.bundleIdentifier
+				let runningApp,
+				let url = runningApp.bundleURL,
+				let bundleIdentifier = runningApp.bundleIdentifier
 			else {
 				return nil
 			}
@@ -664,7 +681,7 @@ extension NSPasteboard {
 				}
 
 				guard
-					let self = self,
+					let self,
 					let source = self.string(forType: .sourceAppBundleIdentifier)
 				else {
 					// We ignore the first event in this case as we cannot know if the existing pasteboard contents came from the frontmost app.
@@ -715,7 +732,7 @@ extension NSPasteboard {
 
 		private func start() {
 			cancellable = pasteboard.publisher.sink { [weak self] in
-				guard let self = self else {
+				guard let self else {
 					return
 				}
 
@@ -955,13 +972,13 @@ extension NSAlert {
 		self.messageText = title
 		self.alertStyle = style
 
-		if let message = message {
+		if let message {
 			self.informativeText = message
 		}
 
 		addButtons(withTitles: buttonTitles)
 
-		if let defaultButtonIndex = defaultButtonIndex {
+		if let defaultButtonIndex {
 			self.defaultButtonIndex = defaultButtonIndex
 		}
 	}
@@ -971,7 +988,7 @@ extension NSAlert {
 	*/
 	@discardableResult
 	func runModal(for window: NSWindow? = nil) -> NSApplication.ModalResponse {
-		guard let window = window else {
+		guard let window else {
 			return runModal()
 		}
 

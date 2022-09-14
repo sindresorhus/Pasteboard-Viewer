@@ -1,5 +1,4 @@
 import SwiftUI
-import Sentry
 
 @MainActor
 final class AppState: ObservableObject {
@@ -22,11 +21,6 @@ final class AppState: ObservableObject {
 			]
 		)
 
-		#if !DEBUG
-		SentrySDK.start {
-			$0.dsn = "https://ded0fb3f6f7e4f0ca1f06048bfc26d57@o844094.ingest.sentry.io/6255818"
-			$0.enableSwizzling = false
-		}
-		#endif
+		SSApp.initSentry("https://ded0fb3f6f7e4f0ca1f06048bfc26d57@o844094.ingest.sentry.io/6255818")
 	}
 }
