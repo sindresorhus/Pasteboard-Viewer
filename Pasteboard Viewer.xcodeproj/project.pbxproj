@@ -11,7 +11,6 @@
 		E31C294423FBE32200DF3442 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C294323FBE32200DF3442 /* Constants.swift */; };
 		E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */; };
 		E353C8B4256BE26800D08A09 /* WelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E353C8B3256BE26800D08A09 /* WelcomeScreen.swift */; };
-		E38A392227DC9FD900AD75D7 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E38A392127DC9FD900AD75D7 /* Sentry */; };
 		E3A7F1DD23F7DAD400CDF428 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DC23F7DAD400CDF428 /* App.swift */; };
 		E3A7F1DF23F7DAD400CDF428 /* MainScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DE23F7DAD400CDF428 /* MainScreen.swift */; };
 		E3A7F1E123F7DAD700CDF428 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3A7F1E023F7DAD700CDF428 /* Assets.xcassets */; };
@@ -45,7 +44,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */,
-				E38A392227DC9FD900AD75D7 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,7 +122,6 @@
 			name = "Pasteboard Viewer";
 			packageProductDependencies = (
 				E31C294123FBE2FA00DF3442 /* Defaults */,
-				E38A392127DC9FD900AD75D7 /* Sentry */,
 			);
 			productName = "Pasteboard Viewer";
 			productReference = E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */;
@@ -156,7 +153,6 @@
 			mainGroup = E3A7F1D023F7DAD400CDF428;
 			packageReferences = (
 				E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */,
-				E38A392027DC9FD900AD75D7 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			productRefGroup = E3A7F1DA23F7DAD400CDF428 /* Products */;
 			projectDirPath = "";
@@ -347,7 +343,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 20;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Pasteboard Viewer/Preview Content\"";
 				DEVELOPMENT_TEAM = YG56YK5RN5;
@@ -359,7 +355,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.4.0;
+				MARKETING_VERSION = 2.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sindresorhus.Pasteboard-Viewer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -375,7 +371,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 20;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Pasteboard Viewer/Preview Content\"";
 				DEVELOPMENT_TEAM = YG56YK5RN5;
@@ -387,7 +383,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.4.0;
+				MARKETING_VERSION = 2.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sindresorhus.Pasteboard-Viewer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -427,14 +423,6 @@
 				minimumVersion = 7.1.0;
 			};
 		};
-		E38A392027DC9FD900AD75D7 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/getsentry/sentry-cocoa";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 7.28.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -442,11 +430,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */;
 			productName = Defaults;
-		};
-		E38A392127DC9FD900AD75D7 /* Sentry */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E38A392027DC9FD900AD75D7 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
-			productName = Sentry;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

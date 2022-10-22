@@ -4,7 +4,7 @@ import Quartz
 import UniformTypeIdentifiers
 import StoreKit
 import Defaults
-import Sentry
+//import Sentry
 
 typealias Defaults = _Defaults
 typealias Default = _Default
