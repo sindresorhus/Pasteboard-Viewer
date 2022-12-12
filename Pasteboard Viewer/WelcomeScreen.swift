@@ -11,7 +11,7 @@ extension AppMain {
 		NSApp.activate(ignoringOtherApps: true)
 
 		NSAlert.showModal(
-			for: window,
+			for: hostingWindow,
 			title: "Welcome to Pasteboard Viewer!",
 			message:
 				"""

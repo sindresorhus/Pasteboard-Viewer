@@ -1,11 +1,15 @@
 import SwiftUI
-import Defaults
+
+/*
+TODO when targeting macOS 13:
+- Upload non-App Store version.
+*/
 
 @main
 struct AppMain: App {
 	@NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 	@StateObject private var appState = AppState()
-	@State var window: NSWindow? // swiftlint:disable:this swiftui_state_private
+	@State var hostingWindow: NSWindow? // swiftlint:disable:this swiftui_state_private
 
 	var body: some Scene {
 		WindowGroup {
@@ -16,7 +20,7 @@ struct AppMain: App {
 						showWelcomeScreenIfNeeded()
 					}
 				}
-				.bindNativeWindow($window)
+				.bindHostingWindow($hostingWindow)
 				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 12.1)
 		}
 			.commands {
@@ -25,6 +29,7 @@ struct AppMain: App {
 				CommandGroup(replacing: .newItem) {}
 				CommandGroup(after: .windowSize) {
 					Defaults.Toggle("Stay on Top", key: .stayOnTop)
+						.keyboardShortcut("t", modifiers: [.control, .command])
 				}
 				CommandGroup(replacing: .help) {
 					Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")

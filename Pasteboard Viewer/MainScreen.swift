@@ -1,6 +1,4 @@
 import SwiftUI
-import Combine
-import Defaults
 
 private struct SidebarItemView: View {
 	let type: Pasteboard.Type_
