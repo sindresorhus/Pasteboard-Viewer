@@ -17,6 +17,7 @@ enum Pasteboard: Equatable, CaseIterable {
 
 		var id: String { "\(item.id)-\(nsType.rawValue)" }
 		var title: String { nsType.rawValue }
+		var decodedDynamicTitleIfAvailable: String? { nsType.decodedDynamic?.rawValue }
 
 		func data() -> Data? {
 			guard !Self.ignoredIdentifiers.contains(nsType.rawValue) else {

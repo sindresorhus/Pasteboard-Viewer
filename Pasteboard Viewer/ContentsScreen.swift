@@ -76,6 +76,6 @@ struct ContentsScreen: View {
 			}
 		}
 			.fillFrame()
-			.navigationTitle(type.title)
+			.navigationTitle(type.decodedDynamicTitleIfAvailable ?? type.title)
 	}
 }

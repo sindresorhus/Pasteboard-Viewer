@@ -4,11 +4,25 @@ private struct SidebarItemView: View {
 	let type: Pasteboard.Type_
 
 	var body: some View {
-		Text(type.title)
+		VStack(alignment: .leading) {
+			if let dynamicTitle = type.decodedDynamicTitleIfAvailable {
+				Text(type.title)
+				Text(dynamicTitle)
+					.font(.system(size: 10))
+					.foregroundStyle(.secondary)
+			} else {
+				Text(type.title)
+			}
+		}
 			.contextMenu {
 				Button("Copy Type Identifier") {
 					// TODO: Pause realtime pasteboard view here when we support that.
 					type.nsType.rawValue.copyToPasteboard()
+				}
+				if let dynamicTitle = type.decodedDynamicTitleIfAvailable {
+					Button("Copy Decoded Type Identifier") {
+						dynamicTitle.copyToPasteboard()
+					}
 				}
 				Divider()
 				if type.nsType == .fileURL {

@@ -1269,3 +1269,125 @@ extension NSImage {
 
 	var pixelSize: CGSize { cgImage?.size ?? size }
 }
+
+
+extension Data {
+	var toString: String? { String(data: self, encoding: .utf8) }
+}
+
+
+extension Collection {
+	subscript(safe index: Index) -> Element? {
+		indices.contains(index) ? self[index] : nil
+	}
+}
+
+
+extension NSPasteboard.PasteboardType {
+	var isDynamic: Bool { rawValue.hasPrefix("dyn.") }
+
+	/**
+	If the type is dynamic, decodes the dynamic pasteboard type to its underlying type.
+	*/
+	var decodedDynamic: Self? {
+		guard
+			isDynamic,
+			let identifier = UTType.decodeDynamicType(rawValue)["com.apple.nspboard-type"]
+		else {
+			return nil
+		}
+
+		return .init(identifier)
+	}
+}
+
+
+// TODO: Write docs.
+extension UTType {
+	static func decodeDynamicType(_ identifier: String) -> [String: String] {
+		let alphabet = "abcdefghkmnpqrstuvwxyz0123456789"
+
+		guard
+			// We only support the `a` variant. Unclear if there are actually other variants.
+			identifier.hasPrefix("dyn.a"),
+			// Drop `dyn.a` (the first 5 characters) as it's not Base32 encoded.
+			let decodedIdentifier = naiveBase32Decode(String(identifier.dropFirst(5)), alphabet: alphabet)?.toString
+		else {
+			return [:]
+		}
+
+		let components = decodedIdentifier
+			.trimmingPrefix("?")
+			.components(separatedBy: ":")
+
+		var result = [String: String]()
+
+		for component in components {
+			let pair = component.components(separatedBy: "=")
+
+			guard
+				let key = pair[safe: 0],
+				let value = pair[safe: 1]
+			else {
+				continue
+			}
+
+			let expandedKey = dynamicTranslation[key, default: key]
+			let expandedValue = dynamicTranslation[value, default: value]
+			result[expandedKey] = expandedValue
+		}
+
+		return result
+	}
+
+	private static let dynamicTranslation: [String: String] = [
+		"0": "UTTypeConformsTo",
+		"1": "public.filename-extension",
+		"2": "com.apple.ostype",
+		"3": "public.mime-type",
+		"4": "com.apple.nspboard-type",
+		"5": "public.url-scheme",
+		"6": "public.data",
+		"7": "public.text",
+		"8": "public.plain-text",
+		"9": "public.utf16-plain-text",
+		"A": "com.apple.traditional-mac-plain-text",
+		"B": "public.image",
+		"C": "public.video",
+		"D": "public.audio",
+		"E": "public.directory",
+		"F": "public.folder"
+	]
+
+	private static func naiveBase32Decode(_ string: String, alphabet: String) -> Data? {
+		let lookup = Dictionary(uniqueKeysWithValues: Swift.zip(alphabet, 0..<alphabet.count))
+
+		var result = Data()
+		var decoded = 0
+		var decodedBits = 0
+
+		for character in string {
+			guard let position = lookup[character] else {
+				print("Found character not in alphabet: \(character)")
+				return nil
+			}
+
+			decoded = (decoded << 5) | position
+			decodedBits += 5
+
+			while decodedBits >= 8 {
+				let extra = decodedBits - 8
+				result.append(UInt8(decoded >> extra))
+				decoded &= (1 << extra) - 1
+				decodedBits = extra
+			}
+		}
+
+		if decoded > 0 {
+			print("\(decodedBits) leftover bits: \(decoded)")
+			return nil
+		}
+
+		return result
+	}
+}
