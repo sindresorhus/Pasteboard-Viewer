@@ -1,43 +1,5 @@
 import SwiftUI
 
-private struct SidebarItemView: View {
-	let type: Pasteboard.Type_
-
-	var body: some View {
-		VStack(alignment: .leading) {
-			if let dynamicTitle = type.decodedDynamicTitleIfAvailable {
-				Text(type.title)
-				Text(dynamicTitle)
-					.font(.system(size: 10))
-					.foregroundStyle(.secondary)
-			} else {
-				Text(type.title)
-			}
-		}
-			.contextMenu {
-				Button("Copy Type Identifier") {
-					// TODO: Pause realtime pasteboard view here when we support that.
-					type.nsType.rawValue.copyToPasteboard()
-				}
-				if let dynamicTitle = type.decodedDynamicTitleIfAvailable {
-					Button("Copy Decoded Type Identifier") {
-						dynamicTitle.copyToPasteboard()
-					}
-				}
-				Divider()
-				if type.nsType == .fileURL {
-					Button("Show in Finder") {
-						type.string()?.toURL?.showInFinder()
-					}
-				} else if type.nsType == .URL {
-					Button("Open in Browser") {
-						type.string()?.toURL?.open()
-					}
-				}
-			}
-	}
-}
-
 struct MainScreen: View {
 	@StateObject private var pasteboardObservable = NSPasteboard.Observable(.general)
 	@Default(.stayOnTop) private var stayOnTop
@@ -46,17 +8,24 @@ struct MainScreen: View {
 
 	var body: some View {
 		// TODO: Set the sidebar to not be collapsible when SwiftUI supports that.
+		// TODO: We intentionally do not use `NavigationSplitView` as there is no way to hide the sidebar toggle button. (macOS 13.1)
+//		NavigationSplitView {
+//			sidebar
+//		} detail: {
+//			mainContent
+//		}
 		NavigationView {
 			sidebar
 			mainContent
 		}
+			.preventSidebarCollapse()
 			// TODO: Change the `minWidth` to `320` when the sidebar can be made unhidable.
 			.frame(minWidth: 240, minHeight: 120)
 			.onChange(of: selectedPasteboard) {
 				pasteboardObservable.pasteboard = $0.nsPasteboard
 				selectedType = $0.firstType
 			}
-			.onChange(of: pasteboardObservable.info, initial: true) { _ in
+			.task(id: pasteboardObservable.info) {
 				selectedType = selectedPasteboard.firstType
 			}
 			.windowTabbingMode(.disallowed)
@@ -130,5 +99,43 @@ struct MainScreen: View {
 struct MainScreen_Previews: PreviewProvider {
 	static var previews: some View {
 		MainScreen()
+	}
+}
+
+private struct SidebarItemView: View {
+	let type: Pasteboard.Type_
+
+	var body: some View {
+		VStack(alignment: .leading) {
+			if let dynamicTitle = type.decodedDynamicTitleIfAvailable {
+				Text(type.title)
+				Text(dynamicTitle)
+					.font(.system(size: 10))
+					.foregroundStyle(.secondary)
+			} else {
+				Text(type.title)
+			}
+		}
+			.contextMenu {
+				Button("Copy Type Identifier") {
+					// TODO: Pause realtime pasteboard view here when we support that.
+					type.nsType.rawValue.copyToPasteboard()
+				}
+				if let dynamicTitle = type.decodedDynamicTitleIfAvailable {
+					Button("Copy Decoded Type Identifier") {
+						dynamicTitle.copyToPasteboard()
+					}
+				}
+				Divider()
+				if type.nsType == .fileURL {
+					Button("Show in Finder") {
+						type.string()?.toURL?.showInFinder()
+					}
+				} else if type.nsType == .URL {
+					Button("Open in Browser") {
+						type.string()?.toURL?.open()
+					}
+				}
+			}
 	}
 }

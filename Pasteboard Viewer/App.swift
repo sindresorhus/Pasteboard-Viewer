@@ -1,18 +1,16 @@
 import SwiftUI
 
-/*
-TODO when targeting macOS 13:
-- Upload non-App Store version.
-*/
-
 @main
 struct AppMain: App {
-	@NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 	@StateObject private var appState = AppState()
 	@State var hostingWindow: NSWindow? // swiftlint:disable:this swiftui_state_private
 
+	init() {
+		setUpConfig()
+	}
+
 	var body: some Scene {
-		WindowGroup {
+		Window(SSApp.name, id: "main") {
 			MainScreen()
 				.environmentObject(appState)
 				.task {
@@ -21,11 +19,9 @@ struct AppMain: App {
 					}
 				}
 				.bindHostingWindow($hostingWindow)
-				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 12.1)
+				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 13.1)
 		}
 			.commands {
-				// TODO: Remove this when SwiftUI support preventing the sidebar from being hidden.
-				SidebarCommands()
 				CommandGroup(replacing: .newItem) {}
 				CommandGroup(after: .windowSize) {
 					Defaults.Toggle("Stay on Top", key: .stayOnTop)
@@ -43,9 +39,14 @@ struct AppMain: App {
 				}
 			}
 	}
-}
 
-@MainActor
-private final class AppDelegate: NSObject, NSApplicationDelegate {
-	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+	private func setUpConfig() {
+		UserDefaults.standard.register(
+			defaults: [
+				"NSApplicationCrashOnExceptions": true
+			]
+		)
+
+		SSApp.initSentry("https://ded0fb3f6f7e4f0ca1f06048bfc26d57@o844094.ingest.sentry.io/6255818")
+	}
 }

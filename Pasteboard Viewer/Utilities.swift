@@ -4,6 +4,7 @@ import Quartz
 import UniformTypeIdentifiers
 import StoreKit
 import Defaults
+import Introspect
 //import Sentry
 
 typealias Defaults = _Defaults
@@ -1100,27 +1101,6 @@ extension View {
 
 extension View {
 	/**
-	`.onChange` version that allows triggering initially (on appear) too, not just on change.
-	*/
-	func onChange<V: Equatable>(
-		of value: V,
-		initial: Bool,
-		perform action: @escaping (V) -> Void
-	) -> some View {
-		onChange(of: value, perform: action)
-			.onAppear {
-				guard initial else {
-					return
-				}
-
-				action(value)
-			}
-	}
-}
-
-
-extension View {
-	/**
 	For empty states in the UI. For example, no items in a list, no search results, etc.
 	*/
 	func emptyStateTextStyle() -> some View {
@@ -1302,8 +1282,10 @@ extension NSPasteboard.PasteboardType {
 }
 
 
-// TODO: Write docs.
 extension UTType {
+	/**
+	Decode a dynamic Uniform Type Identifier.
+	*/
 	static func decodeDynamicType(_ identifier: String) -> [String: String] {
 		let alphabet = "abcdefghkmnpqrstuvwxyz0123456789"
 
@@ -1389,5 +1371,34 @@ extension UTType {
 		}
 
 		return result
+	}
+}
+
+
+extension View {
+	func introspectSplitView(customize: @escaping (NSSplitView) -> Void) -> some View {
+		inject(
+			AppKitIntrospectionView(
+				selector: { introspectionView in
+					guard let viewHost = Introspect.findViewHost(from: introspectionView) else {
+						return nil
+					}
+
+					return Introspect.findAncestorOrAncestorChild(ofType: NSSplitView.self, from: viewHost)
+				},
+				customize: customize
+			)
+		)
+	}
+}
+
+extension View {
+	/**
+	- Note: This only works on the old `NavigationView` and not `NavigationSplitView`.
+	*/
+	func preventSidebarCollapse() -> some View {
+		introspectSplitView {
+			($0.delegate as? NSSplitViewController)?.splitViewItems.first?.canCollapse = false
+		}
 	}
 }

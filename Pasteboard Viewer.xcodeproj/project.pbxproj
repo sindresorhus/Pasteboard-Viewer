@@ -10,6 +10,7 @@
 		E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E31C294123FBE2FA00DF3442 /* Defaults */; };
 		E31C294423FBE32200DF3442 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C294323FBE32200DF3442 /* Constants.swift */; };
 		E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */; };
+		E3494C16297D175B00983648 /* Introspect in Frameworks */ = {isa = PBXBuildFile; productRef = E3494C15297D175B00983648 /* Introspect */; };
 		E353C8B4256BE26800D08A09 /* WelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E353C8B3256BE26800D08A09 /* WelcomeScreen.swift */; };
 		E3A7F1DD23F7DAD400CDF428 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DC23F7DAD400CDF428 /* App.swift */; };
 		E3A7F1DF23F7DAD400CDF428 /* MainScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DE23F7DAD400CDF428 /* MainScreen.swift */; };
@@ -44,6 +45,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */,
+				E3494C16297D175B00983648 /* Introspect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,6 +124,7 @@
 			name = "Pasteboard Viewer";
 			packageProductDependencies = (
 				E31C294123FBE2FA00DF3442 /* Defaults */,
+				E3494C15297D175B00983648 /* Introspect */,
 			);
 			productName = "Pasteboard Viewer";
 			productReference = E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */;
@@ -153,6 +156,7 @@
 			mainGroup = E3A7F1D023F7DAD400CDF428;
 			packageReferences = (
 				E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */,
+				E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 			);
 			productRefGroup = E3A7F1DA23F7DAD400CDF428 /* Products */;
 			projectDirPath = "";
@@ -270,7 +274,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -326,7 +330,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -423,6 +427,14 @@
 				minimumVersion = 7.1.0;
 			};
 		};
+		E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.1.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -430,6 +442,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */;
 			productName = Defaults;
+		};
+		E3494C15297D175B00983648 /* Introspect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
+			productName = Introspect;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
