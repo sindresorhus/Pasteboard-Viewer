@@ -68,6 +68,7 @@ extension SSApp {
 		SentrySDK.start {
 			$0.dsn = dsn
 			$0.enableSwizzling = false
+			$0.enableAppHangTracking = false // https://github.com/getsentry/sentry-cocoa/issues/2643
 		}
 		#endif
 	}
@@ -228,53 +229,19 @@ extension Binding where Value: CaseIterable & Equatable {
 }
 
 
-/**
-Create a `Picker` from an enum.
-
-```
-enum EventIndicatorsInCalendar: String, Codable, CaseIterable {
-	case none
-	case one
-	case maxThree
-
-	var title: String {
-		switch self {
-		case .none:
-			return "None"
-		case .one:
-			return "Single Gray Dot"
-		case .maxThree:
-			return "Up To Three Colored Dots"
-		}
-	}
-}
-
-struct ContentView: View {
-	@Default(.indicateEventsInCalendar) private var indicator
-
-	var body: some View {
-		EnumPicker(
-			"Foo"
-			enumCase: $indicator
-		) {
-			Text($0.title)
-		}
-	}
-}
-```
-*/
 struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatable, Enum.AllCases.Index: Hashable, Label: View, Content: View {
-	let enumBinding: Binding<Enum>
-	let label: Label
-	@ViewBuilder let content: (Enum, Bool) -> Content
+	let selection: Binding<Enum>
+	@ViewBuilder let content: (Enum) -> Content
+	@ViewBuilder let label: () -> Label
 
 	var body: some View {
-		Picker(selection: enumBinding.caseIndex, label: label) {
+		Picker(selection: selection.caseIndex) { // swiftlint:disable:this multiline_arguments
 			ForEach(Array(Enum.allCases).indexed(), id: \.0) { index, element in
-				// TODO: Is `isSelected` really useful? If not, remove it.
-				content(element, element == enumBinding.wrappedValue)
+				content(element)
 					.tag(index)
 			}
+		} label: {
+			label()
 		}
 	}
 }
@@ -282,12 +249,12 @@ struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatab
 extension EnumPicker where Label == Text {
 	init(
 		_ title: some StringProtocol,
-		enumBinding: Binding<Enum>,
-		@ViewBuilder content: @escaping (Enum, Bool) -> Content
+		selection: Binding<Enum>,
+		@ViewBuilder content: @escaping (Enum) -> Content
 	) {
-		self.enumBinding = enumBinding
-		self.label = Text(title)
+		self.selection = selection
 		self.content = content
+		self.label = { Text(title) }
 	}
 }
 
@@ -500,6 +467,7 @@ struct WindowInfo {
 	let memoryUsage: Int
 	let sharingState: CGWindowSharingType // https://stackoverflow.com/questions/27695742/what-does-kcgwindowsharingstate-actually-do
 	let isOnScreen: Bool
+	let fillsScreen: Bool
 
 	/**
 	Accepts a window dictionary coming from `CGWindowListCopyWindowInfo`.
@@ -518,17 +486,32 @@ struct WindowInfo {
 			app: app
 		)
 
-		self.bounds = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
+		let bounds = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
+
+		self.bounds = bounds
 		self.layer = window[kCGWindowLayer as String] as! Int
 		self.alpha = window[kCGWindowAlpha as String] as! Double
 		self.memoryUsage = window[kCGWindowMemoryUsage as String] as? Int ?? 0
 		self.sharingState = CGWindowSharingType(rawValue: window[kCGWindowSharingState as String] as! UInt32)!
 		self.isOnScreen = (window[kCGWindowIsOnscreen as String] as? Int)?.boolValue ?? false
+		self.fillsScreen = NSScreen.screens.contains { $0.frame == bounds }
 	}
 }
 
 extension WindowInfo {
 	typealias Filter = (Self) -> Bool
+
+	private static let appIgnoreList = [
+		"com.apple.dock",
+		"com.apple.notificationcenterui",
+		"com.apple.screencaptureui",
+		"com.apple.PIPAgent",
+		"com.sindresorhus.Pasteboard-Viewer",
+		"co.hypercritical.SwitchGlass", // Dock replacement
+		"app.macgrid.Grid", // https://macgrid.app
+		"com.edge.LGCatalyst", // https://apps.apple.com/app/id1602004436 - It adds a floating player.
+		"com.replay.sleeve" // https://replay.software/sleeve - It adds a floating player.
+	]
 
 	/**
 	Filters out fully transparent windows and windows smaller than 50 width or height.
@@ -538,14 +521,22 @@ extension WindowInfo {
 
 		// Skip windows outside the expected level range.
 		guard
-			window.layer < NSWindow.Level.screenSaver.rawValue,
+			window.layer < NSWindow.Level.mainMenu.rawValue,
 			window.layer >= NSWindow.Level.normal.rawValue
 		else {
 			return false
 		}
 
 		// Skip fully transparent windows, like with Chrome.
-		guard window.alpha > 0 else {
+		// We consider everything below 0.2 to be fully transparent.
+		guard window.alpha > 0.2 else {
+			return false
+		}
+
+		if
+			window.alpha < 0.5,
+			window.fillsScreen
+		{
 			return false
 		}
 
@@ -562,17 +553,21 @@ extension WindowInfo {
 			return false
 		}
 
-		let appIgnoreList = [
-			"com.apple.dock",
-			"com.apple.notificationcenterui",
-			"com.apple.screencaptureui",
-			"com.apple.PIPAgent",
-			"com.sindresorhus.Pasteboard-Viewer",
-			"co.hypercritical.SwitchGlass" // Dock replacement
-		]
+		if let bundleIdentifier = window.owner.bundleIdentifier {
+			if Self.appIgnoreList.contains(bundleIdentifier) {
+				return false
+			}
 
-		if appIgnoreList.contains(window.owner.bundleIdentifier ?? "") {
-			return false
+			let frontmostApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+			let grammarly = "com.grammarly.ProjectLlama"
+
+			// Grammarly puts some hidden window above all other windows. Ignore that.
+			if
+				bundleIdentifier == grammarly,
+				frontmostApp != grammarly
+			{
+				return false
+			}
 		}
 
 		return true
@@ -687,7 +682,7 @@ extension NSPasteboard {
 
 				guard
 					let self,
-					let source = self.string(forType: .sourceAppBundleIdentifier)
+					let source = string(forType: .sourceAppBundleIdentifier)
 				else {
 					// We ignore the first event in this case as we cannot know if the existing pasteboard contents came from the frontmost app.
 					guard !isFirst else {
@@ -741,7 +736,7 @@ extension NSPasteboard {
 					return
 				}
 
-				self.info = $0
+				info = $0
 			}
 		}
 
@@ -1376,23 +1371,6 @@ extension UTType {
 
 
 extension View {
-	func introspectSplitView(customize: @escaping (NSSplitView) -> Void) -> some View {
-		inject(
-			AppKitIntrospectionView(
-				selector: { introspectionView in
-					guard let viewHost = Introspect.findViewHost(from: introspectionView) else {
-						return nil
-					}
-
-					return Introspect.findAncestorOrAncestorChild(ofType: NSSplitView.self, from: viewHost)
-				},
-				customize: customize
-			)
-		)
-	}
-}
-
-extension View {
 	/**
 	- Note: This only works on the old `NavigationView` and not `NavigationSplitView`.
 	*/
@@ -1400,5 +1378,23 @@ extension View {
 		introspectSplitView {
 			($0.delegate as? NSSplitViewController)?.splitViewItems.first?.canCollapse = false
 		}
+	}
+}
+
+
+private struct RespectInactiveViewModifier: ViewModifier {
+	@Environment(\.controlActiveState) private var controlActiveState
+
+	func body(content: Content) -> some View {
+		content.opacity(controlActiveState == .inactive ? 0.5 : 1)
+	}
+}
+
+extension View {
+	/**
+	Make the view respect window inactive state by lowering the opacity.
+	*/
+	func respectInactive() -> some View {
+		modifier(RespectInactiveViewModifier())
 	}
 }

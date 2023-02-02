@@ -62,8 +62,8 @@ struct MainScreen: View {
 			.frame(minWidth: 200, maxWidth: 300)
 			.toolbar {
 				ToolbarItem(placement: .primaryAction) {
-					EnumPicker("Pasteboard", enumBinding: $selectedPasteboard) { pasteboard, _ in
-						Text(pasteboard.nsPasteboard.presentableName)
+					EnumPicker("Pasteboard", selection: $selectedPasteboard) {
+						Text($0.nsPasteboard.presentableName)
 					}
 				}
 			}
@@ -92,6 +92,7 @@ struct MainScreen: View {
 				}
 			}
 				.padding()
+				.respectInactive()
 		}
 	}
 }
@@ -112,6 +113,7 @@ private struct SidebarItemView: View {
 				Text(dynamicTitle)
 					.font(.system(size: 10))
 					.foregroundStyle(.secondary)
+					.respectInactive()
 			} else {
 				Text(type.title)
 			}
