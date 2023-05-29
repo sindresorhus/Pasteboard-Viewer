@@ -35,10 +35,10 @@ enum SSApp {
 
 		if UserDefaults.standard.bool(forKey: key) {
 			return false
-		} else {
-			UserDefaults.standard.set(true, forKey: key)
-			return true
 		}
+
+		UserDefaults.standard.set(true, forKey: key)
+		return true
 	}()
 
 	static func openSendFeedbackPage() {
@@ -407,17 +407,17 @@ extension NSPasteboard {
 	var presentableName: String {
 		switch name {
 		case .general:
-			return "General"
+			"General"
 		case .drag:
-			return "Drag"
+			"Drag"
 		case .find:
-			return "Find"
+			"Find"
 		case .font:
-			return "Font"
+			"Font"
 		case .ruler:
-			return "Ruler"
+			"Ruler"
 		default:
-			return String(describing: self)
+			String(describing: self)
 		}
 	}
 }

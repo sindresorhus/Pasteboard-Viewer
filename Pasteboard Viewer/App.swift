@@ -19,7 +19,7 @@ struct AppMain: App {
 					}
 				}
 				.bindHostingWindow($hostingWindow)
-				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 13.1)
+				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 13.4)
 		}
 			.commands {
 				CommandGroup(replacing: .newItem) {}
@@ -30,7 +30,9 @@ struct AppMain: App {
 				CommandGroup(replacing: .help) {
 					Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
 					Divider()
-					Link("Rate on the App Store", destination: "macappstore://apps.apple.com/app/id1499215709?action=write-review")
+					Link("Rate App", destination: "macappstore://apps.apple.com/app/id1499215709?action=write-review")
+					// TODO: Doesn't work. (macOS 13.4)
+//					ShareLink("Share App", item: "https://apps.apple.com/app/id1499215709")
 					Link("More Apps by Me", destination: "macappstore://apps.apple.com/developer/id328077650")
 					Divider()
 					Button("Send Feedback…") {

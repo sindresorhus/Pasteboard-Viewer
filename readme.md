@@ -31,15 +31,15 @@ Requires macOS 13 or later.
 
 **Older versions**
 
-- [Last macOS 12 compatible version](https://dsc.cloud/sindresorhus/Pasteboard-Viewer-2.4.1-macOS-12-1674373472) *(2.4.1)*
-- [Last macOS 11 compatible version](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.2.2/Pasteboard.Viewer.2.2.2.-.macOS.11.zip) *(2.2.2)*
-- [Last macOS 10.15 compatible version](https://github.com/sindresorhus/Pasteboard-Viewer/releases/tag/v1.5.1) *(1.5.1)*
+- [2.4.1](https://github.com/sindresorhus/meta/files/13539167/Pasteboard-Viewer-2.4.1-macOS-12.zip) for macOS 12+
+- [2.2.2](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.2.2/Pasteboard.Viewer.2.2.2.-.macOS.11.zip) for macOS 11+
+- [1.5.1](https://github.com/sindresorhus/Pasteboard-Viewer/releases/tag/v1.5.1) for macOS 10.15+
 
 **Non-App Store version**
 
-A special version for users that cannot access the App Store. It won't receive updates.
+A special version for users that cannot access the App Store. It won't receive automatic updates. I will update it here once a year.
 
-[Download](https://dsc.cloud/sindresorhus/Pasteboard-Viewer-2.5.0-1674373222) *(2.5.0 · macOS 13+)*
+[Download](https://github.com/sindresorhus/meta/files/13539171/Pasteboard-Viewer-2.5.0.zip) *(2.5.0 · macOS 13+)*
 
 ## Screenshot
 

@@ -55,15 +55,15 @@ enum Pasteboard: Equatable, CaseIterable {
 	var nsPasteboard: NSPasteboard {
 		switch self {
 		case .general:
-			return .general
+			.general
 		case .drag:
-			return .init(name: .drag)
+			.init(name: .drag)
 		case .find:
-			return .init(name: .find)
+			.init(name: .find)
 		case .font:
-			return .init(name: .font)
+			.init(name: .font)
 		case .ruler:
-			return .init(name: .ruler)
+			.init(name: .ruler)
 		}
 	}
 }
