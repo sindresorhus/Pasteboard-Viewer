@@ -58,8 +58,8 @@ struct MainScreen: View {
 				sourceAppView
 			}
 			// TODO: Use this when SwiftUI is able to persist the sidebar size.
-			// .frame(minWidth: 180, idealWidth: 200, maxWidth: 300)
-			.frame(minWidth: 200, maxWidth: 300)
+			// .frame(minWidth: 180, idealWidth: 200)
+			.frame(minWidth: 200)
 			.toolbar {
 				ToolbarItem(placement: .primaryAction) {
 					EnumPicker("Pasteboard", selection: $selectedPasteboard) {
