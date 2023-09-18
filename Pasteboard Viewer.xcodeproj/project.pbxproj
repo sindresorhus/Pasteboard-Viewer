@@ -112,7 +112,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E3A7F1EC23F7DAD700CDF428 /* Build configuration list for PBXNativeTarget "Pasteboard Viewer" */;
 			buildPhases = (
-				E3AC953023F879E800EE128C /* SwiftLint */,
 				E3A7F1D523F7DAD400CDF428 /* Sources */,
 				E3A7F1D623F7DAD400CDF428 /* Frameworks */,
 				E3A7F1D723F7DAD400CDF428 /* Resources */,
@@ -120,6 +119,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				932040202AB7D5030080B53F /* PBXTargetDependency */,
 			);
 			name = "Pasteboard Viewer";
 			packageProductDependencies = (
@@ -158,6 +158,7 @@
 			packageReferences = (
 				E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */,
 				E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
+				9320401E2AB7D4E00080B53F /* XCRemoteSwiftPackageReference "SwiftLint" */,
 			);
 			productRefGroup = E3A7F1DA23F7DAD400CDF428 /* Products */;
 			projectDirPath = "";
@@ -181,29 +182,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		E3AC953023F879E800EE128C /* SwiftLint */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = SwiftLint;
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "swiftlint\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		E3A7F1D523F7DAD400CDF428 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -221,6 +199,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		932040202AB7D5030080B53F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 9320401F2AB7D5030080B53F /* SwiftLintPlugin */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		E3A7F1EA23F7DAD700CDF428 /* Debug */ = {
@@ -420,6 +405,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		9320401E2AB7D4E00080B53F /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/SwiftLint";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.52.4;
+			};
+		};
 		E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/Defaults";
@@ -439,6 +432,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9320401F2AB7D5030080B53F /* SwiftLintPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9320401E2AB7D4E00080B53F /* XCRemoteSwiftPackageReference "SwiftLint" */;
+			productName = "plugin:SwiftLintPlugin";
+		};
 		E31C294123FBE2FA00DF3442 /* Defaults */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */;
