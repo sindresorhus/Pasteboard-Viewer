@@ -66,6 +66,13 @@ struct MainScreen: View {
 						Text($0.nsPasteboard.presentableName)
 					}
 				}
+				ToolbarItem(placement: .primaryAction) {
+					Button {
+						selectedPasteboard.nsPasteboard.clearContents()
+					} label: {
+						Label("Clear", systemImage: "trash")
+					}
+				}
 			}
 	}
 
