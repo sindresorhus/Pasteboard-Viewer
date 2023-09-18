@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainScreen: View {
 	@StateObject private var pasteboardObservable = NSPasteboard.Observable(.general)
+	@Default(.showClearPasteboardButton) private var showClearPasteboardButton
 	@Default(.stayOnTop) private var stayOnTop
 	@State private var selectedPasteboard = Pasteboard.general
 	@State private var selectedType: Pasteboard.Type_?
@@ -66,11 +67,13 @@ struct MainScreen: View {
 						Text($0.nsPasteboard.presentableName)
 					}
 				}
-				ToolbarItem(placement: .primaryAction) {
-					Button {
-						selectedPasteboard.nsPasteboard.clearContents()
-					} label: {
-						Label("Clear", systemImage: "trash")
+				if showClearPasteboardButton {
+					ToolbarItem(placement: .primaryAction) {
+						Button {
+							selectedPasteboard.nsPasteboard.clearContents()
+						} label: {
+							Label("Clear", systemImage: "trash")
+						}
 					}
 				}
 			}

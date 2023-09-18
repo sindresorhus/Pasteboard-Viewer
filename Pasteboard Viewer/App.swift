@@ -23,6 +23,10 @@ struct AppMain: App {
 		}
 			.commands {
 				CommandGroup(replacing: .newItem) {}
+				CommandGroup(after: .toolbar) {
+					Defaults.Toggle("Show \"Clear Pasteboard\" Button", key: .showClearPasteboardButton)
+					Divider()
+				}
 				CommandGroup(after: .windowSize) {
 					Defaults.Toggle("Stay on Top", key: .stayOnTop)
 						.keyboardShortcut("t", modifiers: [.control, .command])
