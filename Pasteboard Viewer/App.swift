@@ -23,6 +23,12 @@ struct AppMain: App {
 		}
 			.commands {
 				CommandGroup(replacing: .newItem) {}
+				CommandGroup(after: .pasteboard) {
+					Divider()
+					Button("Clear Pasteboard") {
+						// TODO: clear pasteboard
+					}
+				}
 				CommandGroup(after: .toolbar) {
 					Defaults.Toggle("Show \"Clear Pasteboard\" Button", key: .showClearPasteboardButton)
 					Divider()
