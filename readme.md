@@ -27,10 +27,11 @@ Tip: Right-click an item in the sidebar to copy the type identifier.
 
 [![](https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/en-us?size=250x83&releaseDate=1615852800)](https://apps.apple.com/app/id1499215709)
 
-Requires macOS 13 or later.
+Requires macOS 14 or later.
 
 **Older versions**
 
+- [2.5.1](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.5.1/Pasteboard.Viewer.2.5.1.-.macOS.13.zip) for macOS 13+
 - [2.4.1](https://github.com/sindresorhus/meta/files/13539167/Pasteboard-Viewer-2.4.1-macOS-12.zip) for macOS 12+
 - [2.2.2](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.2.2/Pasteboard.Viewer.2.2.2.-.macOS.11.zip) for macOS 11+
 - [1.5.1](https://github.com/sindresorhus/Pasteboard-Viewer/releases/tag/v1.5.1) for macOS 10.15+
@@ -39,7 +40,7 @@ Requires macOS 13 or later.
 
 A special version for users that cannot access the App Store. It won't receive automatic updates. I will update it here once a year.
 
-[Download](https://github.com/sindresorhus/meta/files/13539171/Pasteboard-Viewer-2.5.0.zip) *(2.5.0 · macOS 13+)*
+[Download](https://www.dropbox.com/scl/fi/z6tj464zryabggzlydcy3/Pasteboard-Viewer-2.6.0-1705413886.zip?rlkey=dnap7eyta0e1xm28clsqkuclf&raw=1) *(2.6.0 · macOS 14+)*
 
 ## Screenshot
 

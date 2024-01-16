@@ -25,7 +25,7 @@ struct ContentsScreen: View {
 		}
 
 		#if DEBUG
-		print("Type", type.nsType)
+		print("Type", type.nsType.rawValue)
 		#endif
 
 		return Group {
