@@ -42,6 +42,11 @@ struct ContentsScreen: View {
 			{
 				renderString(string)
 			} else if
+				contentType?.conforms(to: .html) == true,
+				let string = type.data()?.decodeStringWithUnknownEncoding()
+			{
+				renderString(string)
+			} else if
 				let data,
 				let image = NSImage(data: data)
 			{

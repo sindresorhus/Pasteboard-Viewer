@@ -1398,3 +1398,31 @@ private struct RespectInactiveViewModifier: ViewModifier {
 		content.opacity(controlActiveState == .inactive ? 0.5 : 1)
 	}
 }
+
+
+extension Data {
+	/**
+	Decodes the string by detecting the encoding.
+	*/
+	func decodeStringWithUnknownEncoding() -> String? {
+		stringEncoding.flatMap { String(data: self, encoding: $0) }
+	}
+
+	/**
+	Attempts to detect the string encoding of the `Data`.
+	*/
+	var stringEncoding: String.Encoding? {
+		let rawValue = NSString.stringEncoding(
+			for: self,
+			encodingOptions: nil,
+			convertedString: nil,
+			usedLossyConversion: nil
+		)
+
+		guard rawValue != 0 else {
+			return nil
+		}
+
+		return .init(rawValue: rawValue)
+	}
+}
