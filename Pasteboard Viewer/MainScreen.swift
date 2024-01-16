@@ -8,7 +8,7 @@ struct MainScreen: View {
 
 	var body: some View {
 		// TODO: Set the sidebar to not be collapsible when SwiftUI supports that.
-		// TODO: We intentionally do not use `NavigationSplitView` as there is no way to hide the sidebar toggle button. (macOS 13.1)
+		// TODO: We intentionally do not use `NavigationSplitView` as there is no way to prevent it from collapsing. (macOS 14.2)
 //		NavigationSplitView {
 //			sidebar
 //		} detail: {
@@ -22,8 +22,8 @@ struct MainScreen: View {
 			// TODO: Change the `minWidth` to `320` when the sidebar can be made unhidable.
 			.frame(minWidth: 240, minHeight: 120)
 			.onChange(of: selectedPasteboard) {
-				pasteboardObservable.pasteboard = $0.nsPasteboard
-				selectedType = $0.firstType
+				pasteboardObservable.pasteboard = selectedPasteboard.nsPasteboard
+				selectedType = selectedPasteboard.firstType
 			}
 			.task(id: pasteboardObservable.info) {
 				selectedType = selectedPasteboard.firstType
@@ -67,6 +67,7 @@ struct MainScreen: View {
 					}
 				}
 			}
+			.toolbar(removing: .sidebarToggle)
 	}
 
 	@ViewBuilder

@@ -24,6 +24,10 @@ struct ContentsScreen: View {
 				.navigationSubtitle(textSubtitle(string))
 		}
 
+		#if DEBUG
+		print("Type", type.nsType)
+		#endif
+
 		return Group {
 			// Ensure plain text is always rendered as plain text.
 			if

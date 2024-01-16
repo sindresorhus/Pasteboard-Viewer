@@ -2,17 +2,19 @@ import SwiftUI
 
 @main
 struct AppMain: App {
-	@StateObject private var appState = AppState()
 	@State var hostingWindow: NSWindow? // swiftlint:disable:this swiftui_state_private
 
 	init() {
 		setUpConfig()
+
+		DispatchQueue.main.async { [self] in
+			didLaunch()
+		}
 	}
 
 	var body: some Scene {
 		Window(SSApp.name, id: "main") {
 			MainScreen()
-				.environmentObject(appState)
 				.task {
 					DispatchQueue.main.async {
 						showWelcomeScreenIfNeeded()
@@ -31,7 +33,7 @@ struct AppMain: App {
 					Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
 					Divider()
 					Link("Rate App", destination: "macappstore://apps.apple.com/app/id1499215709?action=write-review")
-					// TODO: Doesn't work. (macOS 13.4)
+					// TODO: Doesn't work. (macOS 14.2)
 //					ShareLink("Share App", item: "https://apps.apple.com/app/id1499215709")
 					Link("More Apps by Me", destination: "macappstore://apps.apple.com/developer/id328077650")
 					Divider()
@@ -40,6 +42,10 @@ struct AppMain: App {
 					}
 				}
 			}
+	}
+
+	private func didLaunch() {
+		SSApp.requestReviewAfterBeingCalledThisManyTimes([3, 50, 200, 500, 100])
 	}
 
 	private func setUpConfig() {

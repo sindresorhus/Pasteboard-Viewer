@@ -1190,7 +1190,7 @@ extension StringProtocol {
 	/**
 	Convert a string URL to a `URL` type.
 	*/
-	var toURL: URL? { URL(string: String(self)) }
+	var toURL: URL? { URL(string: String(self), encodingInvalidCharacters: false) }
 }
 
 
@@ -1240,9 +1240,9 @@ extension CGImage {
 
 
 extension NSImage {
-	var cgImage: CGImage? { cgImage(forProposedRect: nil, context: nil, hints: nil) }
+	var toCGImage: CGImage? { cgImage(forProposedRect: nil, context: nil, hints: nil) }
 
-	var pixelSize: CGSize { cgImage?.size ?? size }
+	var pixelSize: CGSize { toCGImage?.size ?? size }
 }
 
 
@@ -1382,19 +1382,19 @@ extension View {
 }
 
 
-private struct RespectInactiveViewModifier: ViewModifier {
-	@Environment(\.controlActiveState) private var controlActiveState
-
-	func body(content: Content) -> some View {
-		content.opacity(controlActiveState == .inactive ? 0.5 : 1)
-	}
-}
-
 extension View {
 	/**
 	Make the view respect window inactive state by lowering the opacity.
 	*/
 	func respectInactive() -> some View {
 		modifier(RespectInactiveViewModifier())
+	}
+}
+
+private struct RespectInactiveViewModifier: ViewModifier {
+	@Environment(\.controlActiveState) private var controlActiveState
+
+	func body(content: Content) -> some View {
+		content.opacity(controlActiveState == .inactive ? 0.5 : 1)
 	}
 }
