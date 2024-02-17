@@ -1,8 +1,16 @@
 import SwiftUI
+import TipKit
+
+/**
+TODO iOS 18:
+- Native visionOS version.
+*/
 
 @main
 struct AppMain: App {
+	#if os(macOS)
 	@State var hostingWindow: NSWindow? // swiftlint:disable:this swiftui_state_private
+	#endif
 
 	init() {
 		setUpConfig()
@@ -10,11 +18,16 @@ struct AppMain: App {
 		DispatchQueue.main.async { [self] in
 			didLaunch()
 		}
+
+		#if DEBUG
+//		UIPasteboard.general.items = []
+		#endif
 	}
 
 	var body: some Scene {
-		Window(SSApp.name, id: "main") {
+		WindowIfMacOS(SSApp.name, id: "main") {
 			MainScreen()
+				#if os(macOS)
 				.task {
 					DispatchQueue.main.async {
 						showWelcomeScreenIfNeeded()
@@ -22,31 +35,33 @@ struct AppMain: App {
 				}
 				.bindHostingWindow($hostingWindow)
 				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 13.4)
+				#endif
 		}
 			.commands {
-				CommandGroup(replacing: .newItem) {}
+				CommandGroup(replacing: .newItem) {
+					// TODO: Do this. I need to get the selected pasteboard.
+//					ClearPasteboardButton()
+				}
+				#if os(macOS)
 				CommandGroup(after: .windowSize) {
 					Defaults.Toggle("Stay on Top", key: .stayOnTop)
 						.keyboardShortcut("t", modifiers: [.control, .command])
 				}
+				#endif
 				CommandGroup(replacing: .help) {
 					Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
 					Divider()
-					Link("Rate App", destination: "macappstore://apps.apple.com/app/id1499215709?action=write-review")
-					// TODO: Doesn't work. (macOS 14.2)
-//					ShareLink("Share App", item: "https://apps.apple.com/app/id1499215709")
-					Link("More Apps by Me", destination: "macappstore://apps.apple.com/developer/id328077650")
+					RateOnAppStoreButton(appStoreID: "1499215709")
+					// TODO: Doesn't work. (macOS 14.3)
+//					ShareAppButton(appStoreID: "1499215709")
+					MoreAppsButton()
 					Divider()
-					Button("Send Feedback…") {
-						SSApp.openSendFeedbackPage()
-					}
+					SendFeedbackButton()
 				}
 			}
 	}
 
-	private func didLaunch() {
-		SSApp.requestReviewAfterBeingCalledThisManyTimes([3, 50, 200, 500, 100])
-	}
+	private func didLaunch() {}
 
 	private func setUpConfig() {
 		UserDefaults.standard.register(
@@ -56,5 +71,9 @@ struct AppMain: App {
 		)
 
 		SSApp.initSentry("https://ded0fb3f6f7e4f0ca1f06048bfc26d57@o844094.ingest.sentry.io/6255818")
+
+		Defaults[.launchCount].increment()
+
+		try? Tips.configure()
 	}
 }

@@ -1,11 +1,15 @@
-import AppKit
+import SwiftUI
+import UniformTypeIdentifiers
 
 enum Pasteboard: Equatable, CaseIterable {
 	case general
+
+	#if os(macOS)
 	case drag
 	case find
 	case font
 	case ruler
+	#endif
 
 	struct Type_: Hashable, Identifiable {
 		private static let ignoredIdentifiers: Set<String> = [
@@ -13,49 +17,71 @@ enum Pasteboard: Equatable, CaseIterable {
 		]
 
 		let item: Item
-		let nsType: NSPasteboard.PasteboardType
+		let xType: XPasteboard.PasteboardType
 
-		var id: String { "\(item.id)-\(nsType.rawValue)" }
-		var title: String { nsType.rawValue }
-		var decodedDynamicTitleIfAvailable: String? { nsType.decodedDynamic?.rawValue }
+		var id: String { "\(item.id)-\(xType.rawValue)" }
+		var title: String { xType.rawValue }
+		var decodedDynamicTitleIfAvailable: String? { xType.decodedDynamic?.rawValue }
+		var utType: UTType? { xType.toUTType }
+
+		var isEmpty: Bool { data().map(\.isEmpty) ?? true }
 
 		func data() -> Data? {
-			guard !Self.ignoredIdentifiers.contains(nsType.rawValue) else {
+			guard !Self.ignoredIdentifiers.contains(xType.rawValue) else {
 				return nil
 			}
 
-			return item.rawValue.data(forType: nsType)
+			return item.rawValue.data(forType: xType)
 		}
 
 		func string() -> String? {
-			guard !Self.ignoredIdentifiers.contains(nsType.rawValue) else {
+			guard !Self.ignoredIdentifiers.contains(xType.rawValue) else {
 				return nil
 			}
 
-			return item.rawValue.string(forType: nsType)
+			return item.rawValue.string(forType: xType)
 		}
 	}
 
 	struct Item: RawRepresentable, Hashable, Identifiable {
-		let rawValue: NSPasteboardItem
+		let rawValue: XPasteboardItem
 
 		var id: Int { rawValue.hashValue }
 
 		var types: [Type_] {
-			rawValue.modernTypes.map { Type_(item: self, nsType: $0) }
+			rawValue.modernTypes.map { Type_(item: self, xType: $0) }
 		}
 	}
 
+	private static var itemsCache: (changeCount: Int, items: [Item])?
+
 	var items: [Item] {
-		nsPasteboard.pasteboardItems?.map { Item(rawValue: $0) } ?? []
+		#if !os(macOS)
+		// We cache access to avoid triggering the system toast about pasteboard access.
+		if
+			let cache = Self.itemsCache,
+			cache.changeCount == UIPasteboard.general.changeCount
+		{
+			return cache.items
+		}
+		#endif
+
+		let allItems = xPasteboard.xItems.map { Item(rawValue: $0) }
+
+		#if !os(macOS)
+		Self.itemsCache = (UIPasteboard.general.changeCount, allItems)
+		#endif
+
+		return allItems
 	}
 
 	var firstType: Type_? { items.first?.types.first }
 
-	var nsPasteboard: NSPasteboard {
+	var xPasteboard: XPasteboard {
 		switch self {
 		case .general:
 			.general
+		#if os(macOS)
 		case .drag:
 			.init(name: .drag)
 		case .find:
@@ -64,12 +90,13 @@ enum Pasteboard: Equatable, CaseIterable {
 			.init(name: .font)
 		case .ruler:
 			.init(name: .ruler)
+		#endif
 		}
 	}
 }
 
 
-extension NSPasteboardItem {
+extension XPasteboardItem {
 	private static var typeExclusions = [
 		"NSStringPboardType": "public.utf8-plain-text",
 		"NSFilenamesPboardType": "public.file-url",
@@ -81,13 +108,14 @@ extension NSPasteboardItem {
 		"Apple URL pasteboard type": "public.url",
 		"Apple PDF pasteboard type": "com.adobe.pdf",
 		"Apple PNG pasteboard type": "public.png",
-		"NSColor pasteboard type": "com.apple.cocoa.pasteboard.color"
+		"NSColor pasteboard type": "com.apple.cocoa.pasteboard.color",
+		"iOS rich content paste pasteboard type": "com.apple.uikit.attributedstring"
 	]
 
 	/**
 	`.types` without legacy junk.
 	*/
-	var modernTypes: [NSPasteboard.PasteboardType] {
+	var modernTypes: [XPasteboard.PasteboardType] {
 		guard !types.isEmpty else {
 			return []
 		}

@@ -1,3 +1,4 @@
+#if os(macOS)
 import Cocoa
 
 // TODO: Make a proper welcome window.
@@ -24,3 +25,4 @@ extension AppMain {
 		)
 	}
 }
+#endif

@@ -1,0 +1,10 @@
+Inspect the system pasteboard while developing your app.
+
+This is a developer utility that lets you inspect the system pasteboard. This can be useful to ensure your app is putting the correct data on UIPasteboard. The app refreshes the pasteboard contents live and can preview text, RTF, images, and anything that has a Quick Look preview.
+
+Note that this is not a clipboard manager. If you're not an iOS developer, you probably don't want this app.
+
+It hides obsolete system pasteboard types that have modern equivalents. This includes `CorePasteboardFlavorType`, `NSStringPboardType`, `NSFilenamesPboardType`, etc.
+
+
+Known issue: When the app runs on visionOS in compatibility mode, the system may show a lot of “pasted” notifications. This is a system bug.

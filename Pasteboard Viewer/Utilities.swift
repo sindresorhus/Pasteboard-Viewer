@@ -1,11 +1,27 @@
 import SwiftUI
 import Combine
-import Quartz
 import UniformTypeIdentifiers
-import StoreKit
+import QuickLook
 import Defaults
-import Introspect
+import Collections
 //import Sentry
+
+#if os(macOS)
+import Quartz
+import Introspect
+#endif
+
+#if os(macOS)
+typealias WindowIfMacOS = Window
+typealias XPasteboard = NSPasteboard
+typealias XPasteboardItem = NSPasteboardItem
+typealias XImage = NSImage
+#else
+typealias WindowIfMacOS = WindowGroup
+typealias XPasteboard = UIPasteboard
+typealias XPasteboardItem = UIPasteboardItem
+typealias XImage = UIImage
+#endif
 
 typealias Defaults = _Defaults
 typealias Default = _Default
@@ -40,8 +56,14 @@ enum SSApp {
 		UserDefaults.standard.set(true, forKey: key)
 		return true
 	}()
+}
 
-	static func openSendFeedbackPage() {
+
+extension SSApp {
+	/**
+	- Note: Call this lazily only when actually needed as otherwise it won't get the live info.
+	*/
+	static func appFeedbackUrl() -> URL {
 		let metadata =
 			"""
 			\(name) \(versionWithBuild) - \(idString)
@@ -54,7 +76,7 @@ enum SSApp {
 			"metadata": metadata
 		]
 
-		URL("https://sindresorhus.com/feedback").addingDictionaryAsQuery(query).open()
+		return URL(string: "https://sindresorhus.com/feedback")!.addingDictionaryAsQuery(query)
 	}
 }
 
@@ -76,11 +98,14 @@ extension SSApp {
 
 
 extension URL {
-	/**
-	Convenience for opening URLs.
-	*/
 	func open() {
+		#if os(macOS)
 		NSWorkspace.shared.open(self)
+		#elseif !APP_EXTENSION
+		Task { @MainActor in
+			UIApplication.shared.open(self)
+		}
+		#endif
 	}
 }
 
@@ -92,6 +117,50 @@ extension String {
 	*/
 	func openUrl() {
 		URL(string: self)?.open()
+	}
+}
+
+
+struct SendFeedbackButton: View {
+	var body: some View {
+		Link(
+			"Feedback & Support",
+			systemImage: "exclamationmark.bubble",
+			destination: SSApp.appFeedbackUrl()
+		)
+	}
+}
+
+
+struct MoreAppsButton: View {
+	var body: some View {
+		Link(
+			"More Apps by Me",
+			systemImage: "app.dashed",
+			destination: "itms-apps://apps.apple.com/developer/id328077650"
+		)
+	}
+}
+
+
+struct ShareAppButton: View {
+	let appStoreID: String
+
+	var body: some View {
+		ShareLink("Share App", item: "https://apps.apple.com/app/id\(appStoreID)")
+	}
+}
+
+
+struct RateOnAppStoreButton: View {
+	let appStoreID: String
+
+	var body: some View {
+		Link(
+			"Rate App",
+			systemImage: "star",
+			destination: URL(string: "itms-apps://apps.apple.com/app/id\(appStoreID)?action=write-review")!
+		)
 	}
 }
 
@@ -259,6 +328,20 @@ extension EnumPicker where Label == Text {
 }
 
 
+extension Link<Label<Text, Image>> {
+	init(
+		_ title: String,
+		systemImage: String,
+		destination: URL
+	) {
+		self.init(destination: destination) {
+			Label(title, systemImage: systemImage)
+		}
+	}
+}
+
+
+#if os(macOS)
 /**
 A scrollable and and optionally editable text view.
 
@@ -340,13 +423,64 @@ struct ScrollableTextView: NSViewRepresentable {
 		}
 	}
 }
+#else
+enum _Internal_BorderType: Sendable {
+	case bezelBorder
+	case grooveBorder
+	case lineBorder
+	case noBorder
+}
 
+struct ScrollableTextView: UIViewRepresentable {
+	typealias UIViewType = UITextView
+
+	final class Coordinator: NSObject, UITextViewDelegate {
+		var parent: ScrollableTextView
+
+		init(_ parent: ScrollableTextView) {
+			self.parent = parent
+		}
+
+		func textViewDidChange(_ textView: UITextView) {
+			parent.text = textView.text
+		}
+	}
+
+	@Binding var text: String
+	var font = UIFont.preferredFont(forTextStyle: .body)
+	var borderType = _Internal_BorderType.bezelBorder
+	var isEditable = false
+	var backgroundColor: UIColor?
+
+	func makeCoordinator() -> Coordinator {
+		Coordinator(self)
+	}
+
+	func makeUIView(context: Context) -> UITextView {
+		let textView = UITextView()
+		textView.delegate = context.coordinator
+		textView.textContainerInset = .init(top: 10, left: 5, bottom: 10, right: 5)
+		return textView
+	}
+
+	func updateUIView(_ uiView: UITextView, context: Context) {
+		uiView.text = text
+		uiView.font = font
+		uiView.isEditable = isEditable
+		uiView.backgroundColor = backgroundColor
+	}
+}
+#endif
+
+
+#if os(macOS)
 struct ScrollableAttributedTextView: NSViewRepresentable {
 	typealias NSViewType = NSScrollView
 
 	var attributedText: NSAttributedString?
 	var font: NSFont?
 	var borderType = NSBorderType.bezelBorder
+	var backgroundColor: NSColor?
 	var drawsBackground = true
 	var isEditable = false
 
@@ -369,6 +503,7 @@ struct ScrollableAttributedTextView: NSViewRepresentable {
 
 		let textView = (nsView.documentView as! NSTextView)
 		textView.isEditable = isEditable
+		textView.backgroundColor = backgroundColor ?? NSTextView().backgroundColor
 
 		if
 			let attributedText,
@@ -386,6 +521,85 @@ struct ScrollableAttributedTextView: NSViewRepresentable {
 		}
 	}
 }
+#else
+struct ScrollableAttributedTextView: UIViewRepresentable {
+	typealias UIViewType = UITextView
+
+	var attributedText: NSAttributedString?
+	var font: UIFont?
+	var borderType = _Internal_BorderType.bezelBorder
+	var backgroundColor: UIColor?
+	var isEditable = false
+
+	func makeUIView(context: Context) -> UIViewType {
+		let textView = UITextView()
+		textView.textContainerInset = .init(top: 10, left: 5, bottom: 10, right: 5)
+		return textView
+	}
+
+	func updateUIView(_ uiView: UIViewType, context: Context) {
+		uiView.backgroundColor = backgroundColor
+		uiView.isEditable = isEditable
+
+		if
+			let attributedText,
+			attributedText != uiView.attributedText
+		{
+			uiView.attributedText = attributedText
+		}
+
+		if let font {
+			uiView.font = font
+		}
+
+		if let lineLimit = context.environment.lineLimit {
+			uiView.textContainer.maximumNumberOfLines = lineLimit
+		}
+	}
+}
+#endif
+
+
+#if canImport(UIKit)
+@available(iOSApplicationExtension, unavailable)
+@available(tvOSApplicationExtension, unavailable)
+@available(visionOSApplicationExtension, unavailable)
+extension SSApp {
+	private static var settingsUrl = URL(string: UIApplication.openSettingsURLString)!
+
+	/**
+	Whether the settings view in Settings for the current app exists and can be opened.
+	*/
+	static var canOpenSettings = UIApplication.shared.canOpenURL(settingsUrl)
+
+	/**
+	Open the settings view in Settings for the current app.
+
+	- Important: Ensure you use `.canOpenSettings`.
+	*/
+	@MainActor
+	static func openSettings() async {
+		settingsUrl.open()
+	}
+}
+
+/**
+Open the settings view in Settings for this app.
+
+The button is only visible if the settings view exists and can be opened.
+*/
+struct OpenAppSettingsButton: View {
+	private static let settingsUrl = URL(string: UIApplication.openSettingsURLString)!
+
+	let title: String
+
+	var body: some View {
+		if SSApp.canOpenSettings {
+			Link(title, destination: Self.settingsUrl)
+		}
+	}
+}
+#endif
 
 
 extension View {
@@ -400,6 +614,7 @@ extension View {
 }
 
 
+#if os(macOS)
 extension NSPasteboard {
 	/**
 	Human-readable name of the pasteboard.
@@ -421,6 +636,7 @@ extension NSPasteboard {
 		}
 	}
 }
+#endif
 
 
 extension BinaryInteger {
@@ -428,6 +644,7 @@ extension BinaryInteger {
 }
 
 
+#if os(macOS)
 extension NSRunningApplication {
 	/**
 	Like `.localizedName` but guaranteed to return something useful even if the name is not available.
@@ -441,8 +658,10 @@ extension NSRunningApplication {
 			?? "<Unknown>"
 	}
 }
+#endif
 
 
+#if os(macOS)
 /**
 Static representation of a window.
 
@@ -623,9 +842,10 @@ extension WindowInfo {
 		return app
 	}
 }
+#endif
 
 
-extension NSPasteboard.PasteboardType {
+extension XPasteboard.PasteboardType {
 	/**
 	Convention for getting the bundle identifier of the source app.
 
@@ -635,7 +855,8 @@ extension NSPasteboard.PasteboardType {
 	static let sourceAppBundleIdentifier = Self("org.nspasteboard.source")
 }
 
-extension NSPasteboard {
+
+extension XPasteboard {
 	/**
 	Information about the pasteboard contents.
 	*/
@@ -663,7 +884,8 @@ extension NSPasteboard {
 	/**
 	Returns a publisher that emits when the pasteboard changes.
 	*/
-	var publisher: AnyPublisher<ContentsInfo, Never> {
+	var publisher: some Publisher<ContentsInfo, Never> {
+		#if os(macOS)
 		var isFirst = true
 
 		return Timer.publish(every: 0.2, tolerance: 0.1, on: .main, in: .common)
@@ -711,18 +933,38 @@ extension NSPasteboard {
 					sourceAppURL: NSWorkspace.shared.urlForApplication(withBundleIdentifier: source)
 				)
 			}
-			.eraseToAnyPublisher()
+		#else
+		Publishers.Merge3(
+			// We have to do this for iPad split-view as `XPasteboard.changedNotification` does not fire when the app is not focused.
+			Timer.publish(every: 0.2, tolerance: 0.1, on: .main, in: .common)
+				.autoconnect()
+				.prepend([Date()]) // We want the publisher to also emit immediately when someone subscribes.
+				.compactMap { [weak self] _ in
+					self?.changeCount
+				}
+				.removeDuplicates()
+				.map { _ in },
+			NotificationCenter.default.publisher(for: XPasteboard.changedNotification)
+				.map { _ in },
+			NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+				.map { _ in }
+		)
+		.map { _ in
+			ContentsInfo(sourceAppBundleIdentifier: nil, sourceAppURL: nil)
+		}
+		#endif
 	}
 }
 
-extension NSPasteboard {
+extension XPasteboard {
 	/**
 	An observable object that publishes updates when the given pasteboard changes.
 	*/
+	@MainActor
 	final class Observable: ObservableObject {
 		private var cancellable: AnyCancellable?
 
-		@Published var pasteboard: NSPasteboard {
+		@Published var pasteboard: XPasteboard {
 			didSet {
 				start()
 			}
@@ -740,7 +982,7 @@ extension NSPasteboard {
 			}
 		}
 
-		init(_ pasteboard: NSPasteboard) {
+		init(_ pasteboard: XPasteboard) {
 			self.pasteboard = pasteboard
 			start()
 		}
@@ -748,16 +990,49 @@ extension NSPasteboard {
 }
 
 
+extension XPasteboard {
+	func clear() {
+		#if os(macOS)
+		clearContents()
+		#else
+		items = []
+		#endif
+	}
+}
+
+
+extension XPasteboard {
+	var itemCount: Int {
+		#if os(macOS)
+		pasteboardItems?.count ?? 0
+		#else
+		numberOfItems
+		#endif
+	}
+
+	var isEmpty: Bool { itemCount == 0 }
+}
+
+
+#if os(macOS)
 struct QuickLookPreview: NSViewRepresentable {
 	typealias NSViewType = QLPreviewView
 
-	static func dismantleNSView(_ nsView: QLPreviewView, coordinator: Void) {
+	static func dismantleNSView(_ nsView: QLPreviewView, coordinator: Coordinator) {
 		nsView.close()
+
+		if
+			coordinator.parent.shouldCleanUp,
+			let url = coordinator.parent.previewItem.previewItemURL
+		{
+			DispatchQueue.global(qos: .utility).async {
+				try? FileManager.default.removeItem(at: url)
+			}
+		}
 	}
 
-	/**
-	The item to preview.
-	*/
+	fileprivate var shouldCleanUp = false
+
 	let previewItem: QLPreviewItem
 
 	func makeNSView(context: Context) -> NSViewType {
@@ -769,7 +1044,67 @@ struct QuickLookPreview: NSViewRepresentable {
 	func updateNSView(_ nsView: NSViewType, context: Context) {
 		nsView.previewItem = previewItem
 	}
+
+	func makeCoordinator() -> Coordinator {
+		Coordinator(self)
+	}
+
+	final class Coordinator: NSObject {
+		var parent: QuickLookPreview
+
+		init(_ parent: QuickLookPreview) {
+			self.parent = parent
+		}
+	}
 }
+#else
+struct QuickLookPreview: UIViewControllerRepresentable {
+	fileprivate var shouldCleanUp = false
+
+	let previewItem: QLPreviewItem
+
+	static func dismantleUIViewController(_ uiViewController: QLPreviewController, coordinator: Coordinator) {
+		if
+			coordinator.parent.shouldCleanUp,
+			let url = coordinator.parent.previewItem.previewItemURL
+		{
+			DispatchQueue.global(qos: .utility).async {
+				try? FileManager.default.removeItem(at: url)
+			}
+		}
+	}
+
+	func makeUIViewController(context: Context) -> QLPreviewController {
+		let controller = QLPreviewController()
+		controller.dataSource = context.coordinator
+		return controller
+	}
+
+	func updateUIViewController(_ uiViewController: QLPreviewController, context: Context) {
+		uiViewController.reloadData()
+	}
+
+	func makeCoordinator() -> Coordinator {
+		Coordinator(self)
+	}
+
+	final class Coordinator: NSObject, QLPreviewControllerDataSource {
+		var parent: QuickLookPreview
+
+		init(_ parent: QuickLookPreview) {
+			self.parent = parent
+		}
+
+		func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+			1
+		}
+
+		func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+			parent.previewItem
+		}
+	}
+}
+#endif
 
 extension QuickLookPreview {
 	/**
@@ -790,7 +1125,7 @@ extension QuickLookPreview {
 			let temporaryDirectory = try? FileManager.default.url(
 				for: .itemReplacementDirectory,
 				in: .userDomainMask,
-				appropriateFor: FileManager.default.homeDirectoryForCurrentUser,
+				appropriateFor: FileManager.default.temporaryDirectory,
 				create: true
 			)
 		else {
@@ -805,11 +1140,12 @@ extension QuickLookPreview {
 		}
 
 		self.init(url: url)
+		self.shouldCleanUp = true
 	}
 }
 
 
-extension NSPasteboard.PasteboardType {
+extension XPasteboard.PasteboardType {
 	/**
 	Convert a pasteboard type to a `UTType`.
 	*/
@@ -860,9 +1196,13 @@ extension URL {
 
 extension String {
 	func copyToPasteboard() {
+		#if os(macOS)
 		NSPasteboard.general.prepareForNewContents()
 		NSPasteboard.general.setString(self, forType: .string)
 		NSPasteboard.general.setString(SSApp.idString, forType: .sourceAppBundleIdentifier)
+		#else
+		UIPasteboard.general.string = self
+		#endif
 	}
 }
 
@@ -883,9 +1223,18 @@ extension String {
 
 		return Self(dropLast(suffix.count))
 	}
+
+	var capitalizedFirstCharacter: Self {
+		guard let first else {
+			return ""
+		}
+
+		return Self(first).capitalized + dropFirst()
+	}
 }
 
 
+#if os(macOS)
 /**
 Icon for a file/directory/bundle at the given URL.
 */
@@ -900,8 +1249,10 @@ struct URLIcon: View {
 			.accessibilityHidden(true)
 	}
 }
+#endif
 
 
+#if os(macOS)
 extension NSWorkspace {
 	/**
 	Get an app name from an app URL.
@@ -915,8 +1266,10 @@ extension NSWorkspace {
 		url.localizedName.removingSuffix(".app")
 	}
 }
+#endif
 
 
+#if os(macOS)
 extension NSAlert {
 	/**
 	Show an alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
@@ -1008,8 +1361,10 @@ extension NSAlert {
 		}
 	}
 }
+#endif
 
 
+#if os(macOS)
 private struct WindowAccessor: NSViewRepresentable {
 	private final class WindowAccessorView: NSView {
 		@Binding var windowBinding: NSWindow?
@@ -1092,6 +1447,7 @@ extension View {
 		}
 	}
 }
+#endif
 
 
 extension View {
@@ -1164,6 +1520,39 @@ extension CGSize {
 }
 
 
+enum OperatingSystem {
+	case macOS
+	case iOS
+	case tvOS
+	case watchOS
+	case visionOS
+
+	#if os(macOS)
+	static let current = macOS
+	#elseif os(iOS)
+	static let current = iOS
+	#elseif os(tvOS)
+	static let current = tvOS
+	#elseif os(watchOS)
+	static let current = watchOS
+	#elseif os(visionOS)
+	static let current = visionOS
+	#else
+	#error("Unsupported platform")
+	#endif
+}
+
+extension OperatingSystem {
+	static let isMacOS = current == .macOS
+	static let isIOS = current == .iOS
+	static let isVisionOS = current == .visionOS
+	static let isMacOrVision = isMacOS || isVisionOS
+	static let isIOSOrVision = isIOS || isVisionOS
+}
+
+typealias OS = OperatingSystem
+
+
 extension StringProtocol {
 	func lineCount() -> Int {
 		var count = 0
@@ -1176,6 +1565,7 @@ extension StringProtocol {
 }
 
 
+#if os(macOS)
 extension URL {
 	/**
 	Show the URL (file or directory) in Finder by selecting it.
@@ -1184,6 +1574,7 @@ extension URL {
 		NSWorkspace.shared.activateFileViewerSelecting([resolvingSymlinksInPath()])
 	}
 }
+#endif
 
 
 extension StringProtocol {
@@ -1195,11 +1586,13 @@ extension StringProtocol {
 
 
 extension Numeric {
+	@discardableResult
 	mutating func increment(by value: Self = 1) -> Self {
 		self += value
 		return self
 	}
 
+	@discardableResult
 	mutating func decrement(by value: Self = 1) -> Self {
 		self -= value
 		return self
@@ -1215,32 +1608,19 @@ extension Numeric {
 }
 
 
-extension SSApp {
-	private static let key = Defaults.Key("SSApp_requestReview", default: 0)
-
-	/**
-	Requests a review only after this method has been called the given amount of times.
-	*/
-	static func requestReviewAfterBeingCalledThisManyTimes(_ counts: [Int]) {
-		guard
-			!SSApp.isFirstLaunch,
-			counts.contains(Defaults[key].increment())
-		else {
-			return
-		}
-
-		SKStoreReviewController.requestReview()
-	}
-}
-
-
 extension CGImage {
 	var size: CGSize { CGSize(width: width, height: height) }
 }
 
 
-extension NSImage {
-	var toCGImage: CGImage? { cgImage(forProposedRect: nil, context: nil, hints: nil) }
+extension XImage {
+	var toCGImage: CGImage? {
+		#if os(macOS)
+		cgImage(forProposedRect: nil, context: nil, hints: nil)
+		#else
+		cgImage
+		#endif
+	}
 
 	var pixelSize: CGSize { toCGImage?.size ?? size }
 }
@@ -1258,7 +1638,7 @@ extension Collection {
 }
 
 
-extension NSPasteboard.PasteboardType {
+extension XPasteboard.PasteboardType {
 	var isDynamic: Bool { rawValue.hasPrefix("dyn.") }
 
 	/**
@@ -1267,6 +1647,7 @@ extension NSPasteboard.PasteboardType {
 	var decodedDynamic: Self? {
 		guard
 			isDynamic,
+			// We intentionally do not resolve this to `UTType` first as then it doesn't work.
 			let identifier = UTType.decodeDynamicType(rawValue)["com.apple.nspboard-type"]
 		else {
 			return nil
@@ -1370,6 +1751,7 @@ extension UTType {
 }
 
 
+#if os(macOS)
 extension View {
 	/**
 	- Note: This only works on the old `NavigationView` and not `NavigationSplitView`.
@@ -1380,8 +1762,10 @@ extension View {
 		}
 	}
 }
+#endif
 
 
+#if os(macOS)
 extension View {
 	/**
 	Make the view respect window inactive state by lowering the opacity.
@@ -1396,6 +1780,18 @@ private struct RespectInactiveViewModifier: ViewModifier {
 
 	func body(content: Content) -> some View {
 		content.opacity(controlActiveState == .inactive ? 0.5 : 1)
+	}
+}
+#endif
+
+
+extension View {
+	func navigationSubtitleIfMacOS(_ subtitle: String) -> some View {
+		#if os(macOS)
+		navigationSubtitle(subtitle)
+		#else
+		self
+		#endif
 	}
 }
 
@@ -1413,8 +1809,8 @@ extension Data {
 	*/
 	var stringEncoding: String.Encoding? {
 		let rawValue = NSString.stringEncoding(
-			for: self,
-			encodingOptions: nil,
+			for: prefix(1000 * 1000), // We only check the first 1kb since this check is slow.
+			encodingOptions: [.allowLossyKey: false],
 			convertedString: nil,
 			usedLossyConversion: nil
 		)
@@ -1424,5 +1820,209 @@ extension Data {
 		}
 
 		return .init(rawValue: rawValue)
+	}
+}
+
+
+extension Image {
+	/**
+	Create a SwiftUI `Image` from either `NSImage` or `UIImage`.
+	*/
+	init(xImage: XImage) {
+		#if os(macOS)
+		self.init(nsImage: xImage)
+		#else
+		self.init(uiImage: xImage)
+		#endif
+	}
+}
+
+
+extension Sequence {
+	/**
+	Moves elements that satisfy a given condition to the end of the array, while preserving the order of other elements.
+
+	- Parameter condition: A closure that takes an element of the sequence as its argument and returns a Boolean value indicating whether the element should be moved to the end.
+	- Returns: A new array with elements that satisfy the condition moved to the end, while maintaining the original order of other elements.
+	*/
+	func moveToEnd(where condition: (Element) -> Bool) -> [Element] {
+		let (matching, remaining) = reduce(into: ([Element](), [Element]())) { result, element in
+			if condition(element) {
+				result.0.append(element) // Move to matching
+			} else {
+				result.1.append(element) // Move to remaining
+			}
+		}
+
+		return remaining + matching
+	}
+}
+
+
+#if !os(macOS)
+extension UIPasteboard {
+	struct PasteboardType: Hashable, RawRepresentable, Sendable {
+		let rawValue: String
+	}
+}
+
+extension UIPasteboard.PasteboardType {
+	init(_ rawValue: String) {
+		self.init(rawValue: rawValue)
+	}
+}
+
+extension UIPasteboard.PasteboardType {
+	static let URL = Self("public.url")
+	static let fileURL = Self("public.file-url")
+}
+
+struct UIPasteboardItem: Hashable {
+	let contents: OrderedDictionary<UIPasteboard.PasteboardType, Data>
+
+	init(_ contents: OrderedDictionary<UIPasteboard.PasteboardType, Data>) {
+		self.contents = contents
+	}
+
+	var types: [UIPasteboard.PasteboardType] {
+		Array(contents.keys)
+	}
+
+	func data(forType type: XPasteboard.PasteboardType) -> Data? {
+		contents[type]
+	}
+
+	func string(forType type: XPasteboard.PasteboardType) -> String? {
+		data(forType: type)?.toString
+	}
+}
+#endif
+
+
+extension XPasteboard {
+	private static var xItemsCache: (changeCount: Int, items: [XPasteboardItem])?
+
+	// TODO: Sort `.dyn` last on macOS too.
+	var xItems: [XPasteboardItem] {
+		#if os(macOS)
+		pasteboardItems ?? []
+		#else
+		let allItems = items.enumerated().compactMap { index, itemDictionary in
+			var contents = OrderedDictionary<UIPasteboard.PasteboardType, Data>()
+
+			for type in itemDictionary.map(\.key).sorted().moveToEnd(where: { $0.starts(with: "dyn.") }) {
+				guard let data = data(forPasteboardType: type, inItemSet: IndexSet(integer: index))?.first else {
+					continue
+				}
+
+				contents[.init(type)] = data
+			}
+
+			return contents.isEmpty ? nil : UIPasteboardItem(contents)
+		}
+
+		if
+			let cache = Self.xItemsCache,
+			cache.changeCount == UIPasteboard.general.changeCount
+		{
+			return cache.items
+		}
+
+		Self.xItemsCache = (UIPasteboard.general.changeCount, allItems)
+
+		return allItems
+		#endif
+	}
+}
+
+
+#if !os(macOS)
+extension NSAttributedString {
+	/**
+	AppKit polyfill.
+	*/
+	convenience init?(
+		rtf data: Data,
+		documentAttributes: AutoreleasingUnsafeMutablePointer<NSDictionary?>?
+	) {
+		try? self.init(
+			data: data,
+			options: [.documentType: NSAttributedString.DocumentType.rtf],
+			documentAttributes: documentAttributes
+		)
+	}
+
+	/**
+	AppKit polyfill.
+	*/
+	convenience init?(
+		rtfd data: Data,
+		documentAttributes: AutoreleasingUnsafeMutablePointer<NSDictionary?>?
+	) {
+		try? self.init(
+			data: data,
+			options: [.documentType: NSAttributedString.DocumentType.rtfd],
+			documentAttributes: documentAttributes
+		)
+	}
+}
+#endif
+
+
+extension Data {
+	/**
+	Converts binary property list data into a debug-friendly string.
+
+	- Note: Returns `nil` If the property list is in XML format.
+	*/
+	func binaryPropertyListToDebugString() -> String? {
+		var format = PropertyListSerialization.PropertyListFormat.openStep
+
+		guard
+			let plistObject = try? PropertyListSerialization.propertyList(from: self, options: [], format: &format),
+			format == .binary
+		else {
+			return nil
+		}
+
+		return String(describing: plistObject)
+	}
+
+	func convertPropertyListToXML() throws -> Data {
+		let plistObject = try PropertyListSerialization.propertyList(from: self, options: [], format: nil)
+		return try PropertyListSerialization.data(fromPropertyList: plistObject, format: .xml, options: 0)
+	}
+
+	var propertyListFormat: PropertyListSerialization.PropertyListFormat? {
+		var format = PropertyListSerialization.PropertyListFormat.openStep
+
+		do {
+			try PropertyListSerialization.propertyList(from: self, options: [], format: &format)
+		} catch {
+			return nil
+		}
+
+		return format
+	}
+
+	var isPropertyList: Bool { propertyListFormat != nil }
+	var isBinaryPropertyList: Bool { propertyListFormat == .binary }
+}
+
+
+extension String {
+	/**
+	Escapes null bytes in the string.
+
+	- Returns: A new string where null bytes are replaced with the literal "\0".
+
+	```
+	let inputString = "\u{03}\0\0\0\0#\0\0\0Packages/Text/Plain text.tmLanguage\0\0\0\0"
+	let escapedString = inputString.escapeNullBytes()
+	print(escapedString)
+	```
+	*/
+	func escapingNullBytes() -> String {
+		replacing("\u{0000}", with: "\\0")
 	}
 }
