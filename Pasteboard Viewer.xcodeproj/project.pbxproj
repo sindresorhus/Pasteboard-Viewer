@@ -458,7 +458,7 @@
 			repositoryURL = "https://github.com/sindresorhus/Defaults";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 7.2.0;
+				minimumVersion = 8.2.0;
 			};
 		};
 		E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
@@ -466,7 +466,7 @@
 			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
 			requirement = {
 				kind = upToNextMinorVersion;
-				minimumVersion = 0.2.3;
+				minimumVersion = 1.1.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

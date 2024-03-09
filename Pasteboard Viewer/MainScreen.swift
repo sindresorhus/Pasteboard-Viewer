@@ -183,6 +183,30 @@ private struct SidebarItemView: View {
 	let type: Pasteboard.Type_
 
 	var body: some View {
+		Group {
+			#if os(macOS)
+			contents
+			#else
+			NavigationLink(value: type) {
+				contents
+			}
+			#endif
+		}
+			.lineLimit(2)
+			.contextMenu {
+				CopyTypeIdentifierButtons(type: type)
+				Divider()
+				if type.xType == .fileURL {
+					#if os(macOS)
+					Button("Show in Finder") {
+						type.string()?.toURL?.showInFinder()
+					}
+					#endif
+				}
+			}
+	}
+
+	var contents: some View {
 		VStack(alignment: .leading) {
 			if let dynamicTitle = type.decodedDynamicTitleIfAvailable {
 				Text(dynamicTitle)
@@ -212,18 +236,6 @@ private struct SidebarItemView: View {
 				#endif
 			}
 		}
-			.lineLimit(2)
-			.contextMenu {
-				CopyTypeIdentifierButtons(type: type)
-				Divider()
-				if type.xType == .fileURL {
-					#if os(macOS)
-					Button("Show in Finder") {
-						type.string()?.toURL?.showInFinder()
-					}
-					#endif
-				}
-			}
 	}
 }
 
