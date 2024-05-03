@@ -8,7 +8,7 @@ import Collections
 
 #if os(macOS)
 import Quartz
-import Introspect
+import SwiftUIIntrospect
 #endif
 
 #if os(macOS)
@@ -1757,7 +1757,7 @@ extension View {
 	- Note: This only works on the old `NavigationView` and not `NavigationSplitView`.
 	*/
 	func preventSidebarCollapse() -> some View {
-		introspectSplitView {
+		introspect(.navigationSplitView, on: .macOS(.v14)) {
 			($0.delegate as? NSSplitViewController)?.splitViewItems.first?.canCollapse = false
 		}
 	}
