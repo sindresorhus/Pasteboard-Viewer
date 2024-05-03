@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		55FABE8A2BE1801E004E66FD /* HexFiend in Frameworks */ = {isa = PBXBuildFile; platformFilters = (macos, ); productRef = 55FABE892BE1801E004E66FD /* HexFiend */; };
 		E3065AA82B81118700475AB5 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = E3065AA72B81118700475AB5 /* Collections */; };
 		E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E31C294123FBE2FA00DF3442 /* Defaults */; };
 		E31C294423FBE32200DF3442 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C294323FBE32200DF3442 /* Constants.swift */; };
@@ -48,6 +49,7 @@
 				E3065AA82B81118700475AB5 /* Collections in Frameworks */,
 				E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */,
 				E3494C16297D175B00983648 /* Introspect in Frameworks */,
+				55FABE8A2BE1801E004E66FD /* HexFiend in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,6 +130,7 @@
 				E31C294123FBE2FA00DF3442 /* Defaults */,
 				E3494C15297D175B00983648 /* Introspect */,
 				E3065AA72B81118700475AB5 /* Collections */,
+				55FABE892BE1801E004E66FD /* HexFiend */,
 			);
 			productName = "Pasteboard Viewer";
 			productReference = E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */;
@@ -163,6 +166,7 @@
 				E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 				9320401E2AB7D4E00080B53F /* XCRemoteSwiftPackageReference "SwiftLint" */,
 				E3065AA62B81118700475AB5 /* XCRemoteSwiftPackageReference "swift-collections" */,
+				55FABE882BE1801E004E66FD /* XCRemoteSwiftPackageReference "HexFiend" */,
 			);
 			productRefGroup = E3A7F1DA23F7DAD400CDF428 /* Products */;
 			projectDirPath = "";
@@ -437,6 +441,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		55FABE882BE1801E004E66FD /* XCRemoteSwiftPackageReference "HexFiend" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/HexFiend/HexFiend.git";
+			requirement = {
+				branch = package;
+				kind = branch;
+			};
+		};
 		9320401E2AB7D4E00080B53F /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/realm/SwiftLint";
@@ -472,6 +484,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		55FABE892BE1801E004E66FD /* HexFiend */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 55FABE882BE1801E004E66FD /* XCRemoteSwiftPackageReference "HexFiend" */;
+			productName = HexFiend;
+		};
 		9320401F2AB7D5030080B53F /* SwiftLintPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 9320401E2AB7D4E00080B53F /* XCRemoteSwiftPackageReference "SwiftLint" */;

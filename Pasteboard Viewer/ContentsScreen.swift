@@ -1,12 +1,66 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import HexFiend
 
 struct ContentsScreen: View {
 	@EnvironmentObject private var pasteboardObservable: XPasteboard.Observable
+	@State private var viewAsText = true
+	@State private var selectedByteRanges = Set<Range<UInt64>>()
 
 	let type: Pasteboard.Type_
 
 	var body: some View {
+		Group {
+			if viewAsText {
+				textBody
+			} else {
+				hexBody
+			}
+		}
+		.fillFrame()
+		.navigationTitle(type.decodedDynamicTitleIfAvailable ?? type.title)
+		.toolbar {
+			formatPicker
+			moreButton
+		}
+	}
+
+	var hexBody: some View {
+		// this uses a .number formatter instead of .byteCount,
+		// because a byte count format doesn't have a way to exclude the grouping character
+		let count = (type.data()?.count ?? 0)
+		let length = count.formatted(.number.grouping(.never)) + " " + (count == 1 ? "byte" : "bytes")
+		let extraInfo: String
+		if selectedByteRanges.isEmpty {
+			// no selection
+			extraInfo = length
+		} else if let range = selectedByteRanges.first, selectedByteRanges.count == 1 {
+			// single or empty selection
+			let offset = range.lowerBound.formatted(.number.grouping(.never))
+			if range.lowerBound == range.upperBound {
+				// no selection
+				extraInfo = length
+			} else if range.upperBound - range.lowerBound == 1 {
+				// single byte
+				extraInfo = "Byte \(offset) selected out of \(length)"
+			} else {
+				// multiple bytes
+				let count = (range.upperBound - range.lowerBound).formatted(.number.grouping(.never))
+				extraInfo = "\(count) bytes selected at offset \(offset) out of \(length)"
+			}
+		} else {
+			// multiple selection
+			let totalCount = selectedByteRanges.reduce(into: UInt64.zero, { $0 += ($1.upperBound - $1.lowerBound) })
+				.formatted(.number.grouping(.never))
+
+			extraInfo = "\(totalCount) selected at multiple offsets out of \(length)"
+		}
+
+		return HexView(data: type.data(), selection: $selectedByteRanges)
+			.extraInfo(extraInfo)
+	}
+
+	var textBody: some View {
 		let data = type.data()
 		let sizeString = (data?.count ?? 0).formatted(.byteCount(style: .file))
 		let contentType = type.utType
@@ -25,9 +79,9 @@ struct ContentsScreen: View {
 			.extraInfo(customExtraInfo ?? textSubtitle(string))
 		}
 
-		#if DEBUG
+#if DEBUG
 		print("Type", type.xType.rawValue)
-		#endif
+#endif
 
 		return VStack {
 			// Ensure plain text is always rendered as plain text.
@@ -91,11 +145,19 @@ struct ContentsScreen: View {
 					.emptyStateTextStyle()
 			}
 		}
-			.fillFrame()
-			.navigationTitle(type.decodedDynamicTitleIfAvailable ?? type.title)
-			.toolbar {
-				moreButton
-			}
+	}
+
+	private var formatPicker: some View {
+		Picker("View As…", selection: $viewAsText) {
+			Label("View as text", systemImage: "textformat")
+				.tag(true)
+				.help("View as text")
+			Label("View as hex", systemImage: "number")
+				.tag(false)
+				.help("View as hex")
+		}
+		.pickerStyle(.segmented)
+		.labelsHidden()
 	}
 
 	private var moreButton: some View {
@@ -103,9 +165,9 @@ struct ContentsScreen: View {
 			Section {
 				if type.xType == .URL {
 					Button("Open in Browser", systemImage: "safari") {
-						#if os(macOS)
+#if os(macOS)
 						type.string()?.toURL?.open()
-						#else
+#else
 						// On iOS, `.URL` is usually wrapped in a plist, but in case it's a plain string, we try it first.
 						if let url = type.string()?.toURL {
 							url.open()
@@ -121,7 +183,7 @@ struct ContentsScreen: View {
 						}
 
 						url.openUrl()
-						#endif
+#endif
 					}
 				}
 			}
@@ -156,9 +218,9 @@ struct ContentsScreen: View {
 
 extension View {
 	fileprivate func extraInfo(_ text: String) -> some View {
-		#if os(macOS)
+#if os(macOS)
 		navigationSubtitleIfMacOS(text)
-		#else
+#else
 		// Note: Using `ToolbarItem(placement: .bottomBar)` caused it to loose the "back" button when starting to swiping to go back, but then deciding not to.
 		fillFrame()
 			.safeAreaInset(edge: .bottom) {
@@ -167,7 +229,7 @@ extension View {
 					.font(.system(.subheadline))
 					.padding(4)
 			}
-		#endif
+#endif
 	}
 }
 
@@ -232,7 +294,7 @@ extension Pasteboard.Type_ {
 
 		if
 			// We don't do this as not all binary property list items correctly conform to this.
-//			utType.conforms(to: .propertyList),
+			//			utType.conforms(to: .propertyList),
 			let format = data.propertyListFormat,
 			format == .binary, // We only do binary as `.xml` and `.openStep` also work when the contents is just a plain string.
 			let decoded = try? data.convertPropertyListToXML()
@@ -256,5 +318,69 @@ extension Pasteboard.Type_ {
 		}
 
 		return (utType, data)
+	}
+}
+
+struct HexView: NSViewRepresentable {
+	class Coordinator: HFRepresenter, ObservableObject {
+		let selectionBinding: Binding<Set<Range<UInt64>>>
+		var isUpdating = false
+
+		init(selectionBinding: Binding<Set<Range<UInt64>>>) {
+			self.selectionBinding = selectionBinding
+			super.init()
+		}
+
+		@available(*, unavailable)
+		required init?(coder: NSCoder) {
+			fatalError("init(coder:) has not been implemented")
+		}
+
+		override func createView() -> NSView {
+			// required when subclassing HFRepresenter
+			NSView()
+		}
+
+		override func controllerDidChange(_ bits: HFControllerPropertyBits) {
+			guard isUpdating == false else {
+				return
+			}
+			if bits.contains(.contentValue) || bits.contains(.selectedRanges) {
+				// update the selection binding
+				if let controller = self.controller() {
+					let ranges = controller.selectedContentsRanges.compactMap { rangeWrapper -> Range<UInt64>? in
+						guard let hf = (rangeWrapper as? HFRangeWrapper)?.hfRange() else {
+							return nil
+						}
+						return hf.location ..< (hf.location + hf.length)
+					}
+					selectionBinding.wrappedValue = Set(ranges)
+				} else {
+					selectionBinding.wrappedValue = Set()
+				}
+			}
+		}
+	}
+
+	var data: Data?
+	@Binding var selection: Set<Range<UInt64>>
+
+	func makeCoordinator() -> Coordinator {
+		Coordinator(selectionBinding: $selection)
+	}
+
+	func makeNSView(context: Context) -> HFTextView {
+		context.coordinator.isUpdating = true
+		defer { context.coordinator.isUpdating = false }
+		let textView = HFTextView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+		textView.controller.addRepresenter(context.coordinator)
+		textView.controller.editMode = .readOnlyMode
+		return textView
+	}
+
+	func updateNSView(_ nsView: HFTextView, context: Context) {
+		context.coordinator.isUpdating = true
+		defer { context.coordinator.isUpdating = false }
+		nsView.data = data
 	}
 }
