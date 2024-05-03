@@ -25,7 +25,7 @@ struct ContentsScreen: View {
 		}
 	}
 
-	var hexBody: some View {
+	private var hexBody: some View {
 		// this uses a .number formatter instead of .byteCount,
 		// because a byte count format doesn't have a way to exclude the grouping character
 		let count = (type.data()?.count ?? 0)
@@ -60,7 +60,7 @@ struct ContentsScreen: View {
 			.extraInfo(extraInfo)
 	}
 
-	var textBody: some View {
+	private var textBody: some View {
 		let data = type.data()
 		let sizeString = (data?.count ?? 0).formatted(.byteCount(style: .file))
 		let contentType = type.utType
