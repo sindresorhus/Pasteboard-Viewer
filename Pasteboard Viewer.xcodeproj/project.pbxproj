@@ -13,8 +13,8 @@
 		E31C294423FBE32200DF3442 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C294323FBE32200DF3442 /* Constants.swift */; };
 		E32033FE2B887F8D00935A23 /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32033FD2B887F8D00935A23 /* Intents.swift */; };
 		E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */; };
-		E3494C16297D175B00983648 /* Introspect in Frameworks */ = {isa = PBXBuildFile; platformFilters = (macos, ); productRef = E3494C15297D175B00983648 /* Introspect */; };
 		E353C8B4256BE26800D08A09 /* WelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E353C8B3256BE26800D08A09 /* WelcomeScreen.swift */; };
+		E35B30CD2BE535E3007C4E89 /* SwiftUIIntrospect-Static in Frameworks */ = {isa = PBXBuildFile; platformFilters = (macos, ); productRef = E35B30CC2BE535E3007C4E89 /* SwiftUIIntrospect-Static */; };
 		E3A7F1DD23F7DAD400CDF428 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DC23F7DAD400CDF428 /* App.swift */; };
 		E3A7F1DF23F7DAD400CDF428 /* MainScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7F1DE23F7DAD400CDF428 /* MainScreen.swift */; };
 		E3A7F1E123F7DAD700CDF428 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3A7F1E023F7DAD700CDF428 /* Assets.xcassets */; };
@@ -48,19 +48,27 @@
 			files = (
 				E3065AA82B81118700475AB5 /* Collections in Frameworks */,
 				E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */,
-				E3494C16297D175B00983648 /* Introspect in Frameworks */,
 				55FABE8A2BE1801E004E66FD /* HexFiend in Frameworks */,
+				E35B30CD2BE535E3007C4E89 /* SwiftUIIntrospect-Static in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E35B30CB2BE535E3007C4E89 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E3A7F1D023F7DAD400CDF428 = {
 			isa = PBXGroup;
 			children = (
 				E3A7F1DB23F7DAD400CDF428 /* Pasteboard Viewer */,
 				E3A7F1DA23F7DAD400CDF428 /* Products */,
+				E35B30CB2BE535E3007C4E89 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 			usesTabs = 1;
@@ -128,9 +136,9 @@
 			name = "Pasteboard Viewer";
 			packageProductDependencies = (
 				E31C294123FBE2FA00DF3442 /* Defaults */,
-				E3494C15297D175B00983648 /* Introspect */,
 				E3065AA72B81118700475AB5 /* Collections */,
 				55FABE892BE1801E004E66FD /* HexFiend */,
+				E35B30CC2BE535E3007C4E89 /* SwiftUIIntrospect-Static */,
 			);
 			productName = "Pasteboard Viewer";
 			productReference = E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */;
@@ -504,10 +512,10 @@
 			package = E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */;
 			productName = Defaults;
 		};
-		E3494C15297D175B00983648 /* Introspect */ = {
+		E35B30CC2BE535E3007C4E89 /* SwiftUIIntrospect-Static */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
-			productName = Introspect;
+			productName = "SwiftUIIntrospect-Static";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
