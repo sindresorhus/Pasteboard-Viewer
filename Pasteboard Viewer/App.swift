@@ -12,7 +12,7 @@ struct AppMain: App {
 	@State var hostingWindow: NSWindow? // swiftlint:disable:this swiftui_state_private
 	#endif
 
-	@AppStorage("viewAsText") var viewAsText = true
+	@Default(.viewAsText) private var viewAsText
 
 	init() {
 		setUpConfig()
@@ -50,10 +50,10 @@ struct AppMain: App {
 						.keyboardShortcut("t", modifiers: [.control, .command])
 				}
 				CommandGroup(after: .toolbar) {
-					Toggle("View as Text", isOn: $viewAsText)
+					Toggle("View as Text", isOn: .init(get: { viewAsText }, set: { _ in viewAsText = true }))
 						.keyboardShortcut("1", modifiers: .command)
 
-					Toggle("View as Hex", isOn: .init(get: { !viewAsText }, set: { viewAsText = !$0 }))
+					Toggle("View as Hex", isOn: .init(get: { !viewAsText }, set: { _ in viewAsText = false }))
 						.keyboardShortcut("2", modifiers: .command)
 				}
 				#endif
