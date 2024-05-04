@@ -50,11 +50,7 @@ struct AppMain: App {
 						.keyboardShortcut("t", modifiers: [.control, .command])
 				}
 				CommandGroup(after: .toolbar) {
-					Toggle("View as Text", isOn: .init(get: { viewAsText }, set: { _ in viewAsText = true }))
-						.keyboardShortcut("1", modifiers: .command)
-
-					Toggle("View as Hex", isOn: .init(get: { !viewAsText }, set: { _ in viewAsText = false }))
-						.keyboardShortcut("2", modifiers: .command)
+					formatPicker
 				}
 				#endif
 				CommandGroup(replacing: .help) {
@@ -84,5 +80,30 @@ struct AppMain: App {
 		Defaults[.launchCount].increment()
 
 		try? Tips.configure()
+	}
+
+	private var formatPicker: some View {
+		Section {
+			Toggle(
+				"View as Text",
+				isOn: .init(
+					get: { viewAsText },
+					set: { _ in
+						viewAsText = true
+					}
+				)
+			)
+			.keyboardShortcut("1", modifiers: .command)
+			Toggle(
+				"View as Hex",
+				isOn: .init(
+					get: { !viewAsText },
+					set: { _ in
+						viewAsText = false
+					}
+				)
+			)
+			.keyboardShortcut("2", modifiers: .command)
+		}
 	}
 }

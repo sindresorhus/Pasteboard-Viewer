@@ -33,44 +33,48 @@ struct ContentsScreen: View {
 	}
 
 	#if os(macOS)
+	private var hexBody: some View {
+		HexView(data: type.data(), selection: $selectedByteRanges)
+			.extraInfo(hexBodyExtraInfo)
+	}
+
 	private var hexBodyExtraInfo: String {
-		// this uses a .number formatter instead of .byteCount,
-		// because a byte count format doesn't have a way to exclude the grouping character
+		// This uses a `.number` formatter instead of `.byteCount`,
+		// because a byte count format doesn't have a way to exclude the grouping character.
 		let count = (type.data()?.count ?? 0)
 		let length = count.formatted(.number.grouping(.never)) + " " + (count == 1 ? "byte" : "bytes")
-		if selectedByteRanges.isEmpty {
-			// no selection
+
+		guard !selectedByteRanges.isEmpty else {
+			// No selection
 			return length
 		}
 
-		if let range = selectedByteRanges.first, selectedByteRanges.count == 1 {
-			// single or empty selection
+		if
+			let range = selectedByteRanges.first,
+			selectedByteRanges.count == 1
+		{
+			// Single or empty selection.
 			let offset = range.lowerBound.formatted(.number.grouping(.never))
 			if range.lowerBound == range.upperBound {
-				// no selection
+				// No selection.
 				return length
 			}
 
 			if range.upperBound - range.lowerBound == 1 {
-				// single byte
+				// Single byte.
 				return "Byte \(offset) selected out of \(length)"
 			}
 
-			// multiple selected bytes
+			// Multiple selected bytes.
 			let count = (range.upperBound - range.lowerBound).formatted(.number.grouping(.never))
 			return "\(count) bytes selected at offset \(offset) out of \(length)"
 		}
 
-		// multiple selection
+		// Multiple selection.
 		let totalCount = selectedByteRanges.reduce(into: UInt64.zero, { $0 += ($1.upperBound - $1.lowerBound) })
 			.formatted(.number.grouping(.never))
 
 		return "\(totalCount) selected at multiple offsets out of \(length)"
-	}
-
-	private var hexBody: some View {
-		HexView(data: type.data(), selection: $selectedByteRanges)
-			.extraInfo(hexBodyExtraInfo)
 	}
 	#endif
 
@@ -93,9 +97,9 @@ struct ContentsScreen: View {
 			.extraInfo(customExtraInfo ?? textSubtitle(string))
 		}
 
-#if DEBUG
+		#if DEBUG
 		print("Type", type.xType.rawValue)
-#endif
+		#endif
 
 		return VStack {
 			// Ensure plain text is always rendered as plain text.
@@ -183,9 +187,9 @@ struct ContentsScreen: View {
 			Section {
 				if type.xType == .URL {
 					Button("Open in Browser", systemImage: "safari") {
-#if os(macOS)
+						#if os(macOS)
 						type.string()?.toURL?.open()
-#else
+						#else
 						// On iOS, `.URL` is usually wrapped in a plist, but in case it's a plain string, we try it first.
 						if let url = type.string()?.toURL {
 							url.open()
@@ -201,7 +205,7 @@ struct ContentsScreen: View {
 						}
 
 						url.openUrl()
-#endif
+						#endif
 					}
 				}
 			}
@@ -236,9 +240,9 @@ struct ContentsScreen: View {
 
 extension View {
 	fileprivate func extraInfo(_ text: String) -> some View {
-#if os(macOS)
+		#if os(macOS)
 		navigationSubtitleIfMacOS(text)
-#else
+		#else
 		// Note: Using `ToolbarItem(placement: .bottomBar)` caused it to loose the "back" button when starting to swiping to go back, but then deciding not to.
 		fillFrame()
 			.safeAreaInset(edge: .bottom) {
@@ -247,7 +251,7 @@ extension View {
 					.font(.system(.subheadline))
 					.padding(4)
 			}
-#endif
+		#endif
 	}
 }
 
@@ -341,9 +345,9 @@ extension Pasteboard.Type_ {
 
 #if os(macOS)
 struct HexView: NSViewRepresentable {
-	class Coordinator: HFRepresenter {
-		let selectionBinding: Binding<Set<Range<UInt64>>>
-		var isUpdating = false
+	final class Coordinator: HFRepresenter {
+		private let selectionBinding: Binding<Set<Range<UInt64>>>
+		fileprivate var isUpdating = false
 
 		init(selectionBinding: Binding<Set<Range<UInt64>>>) {
 			self.selectionBinding = selectionBinding
@@ -356,29 +360,33 @@ struct HexView: NSViewRepresentable {
 		}
 
 		override func createView() -> NSView {
-			// required when subclassing HFRepresenter
+			// Required when subclassing HFRepresenter.
 			NSView()
 		}
 
 		override func controllerDidChange(_ bits: HFControllerPropertyBits) {
-			guard isUpdating == false else {
+			guard
+				!isUpdating,
+				bits.contains(.contentValue) || bits.contains(.selectedRanges)
+			else {
 				return
 			}
-			guard bits.contains(.contentValue) || bits.contains(.selectedRanges) else {
-				return
-			}
-			// update the selection binding
-			if let controller = self.controller() {
-				let ranges = controller.selectedContentsRanges.compactMap { rangeWrapper -> Range<UInt64>? in
-					guard let hf = (rangeWrapper as? HFRangeWrapper)?.hfRange() else {
-						return nil
-					}
-					return hf.location ..< (hf.location + hf.length)
-				}
-				selectionBinding.wrappedValue = Set(ranges)
-			} else {
+
+			// Update the selection binding.
+			guard let controller = controller() else {
 				selectionBinding.wrappedValue = Set()
+				return
 			}
+
+			let ranges = controller.selectedContentsRanges.compactMap { rangeWrapper -> Range<UInt64>? in
+				guard let hf = (rangeWrapper as? HFRangeWrapper)?.hfRange() else {
+					return nil
+				}
+
+				return hf.location..<(hf.location + hf.length)
+			}
+
+			selectionBinding.wrappedValue = Set(ranges)
 		}
 	}
 
@@ -386,13 +394,16 @@ struct HexView: NSViewRepresentable {
 	@Binding var selection: Set<Range<UInt64>>
 
 	func makeCoordinator() -> Coordinator {
-		Coordinator(selectionBinding: $selection)
+		.init(selectionBinding: $selection)
 	}
 
 	func makeNSView(context: Context) -> HFTextView {
 		context.coordinator.isUpdating = true
-		defer { context.coordinator.isUpdating = false }
-		let textView = HFTextView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+		defer {
+			context.coordinator.isUpdating = false
+		}
+
+		let textView = HFTextView(frame: .init(x: 0, y: 0, width: 100, height: 100))
 		textView.controller.addRepresenter(context.coordinator)
 		textView.controller.editMode = .readOnlyMode
 		return textView
@@ -400,7 +411,10 @@ struct HexView: NSViewRepresentable {
 
 	func updateNSView(_ nsView: HFTextView, context: Context) {
 		context.coordinator.isUpdating = true
-		defer { context.coordinator.isUpdating = false }
+		defer {
+			context.coordinator.isUpdating = false
+		}
+
 		nsView.data = data
 	}
 }
