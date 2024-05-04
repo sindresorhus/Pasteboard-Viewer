@@ -1,6 +1,9 @@
 import SwiftUI
 import UniformTypeIdentifiers
+
+#if os(macOS)
 import HexFiend
+#endif
 
 struct ContentsScreen: View {
 	@EnvironmentObject private var pasteboardObservable: XPasteboard.Observable
@@ -11,11 +14,15 @@ struct ContentsScreen: View {
 
 	var body: some View {
 		Group {
+			#if os(macOS)
 			if viewAsText {
 				textBody
 			} else {
 				hexBody
 			}
+			#else
+			textBody
+			#endif
 		}
 		.fillFrame()
 		.navigationTitle(type.decodedDynamicTitleIfAvailable ?? type.title)
@@ -25,40 +32,47 @@ struct ContentsScreen: View {
 		}
 	}
 
-	private var hexBody: some View {
+	#if os(macOS)
+	private var hexBodyExtraInfo: String {
 		// this uses a .number formatter instead of .byteCount,
 		// because a byte count format doesn't have a way to exclude the grouping character
 		let count = (type.data()?.count ?? 0)
 		let length = count.formatted(.number.grouping(.never)) + " " + (count == 1 ? "byte" : "bytes")
-		let extraInfo: String
 		if selectedByteRanges.isEmpty {
 			// no selection
-			extraInfo = length
-		} else if let range = selectedByteRanges.first, selectedByteRanges.count == 1 {
+			return length
+		}
+
+		if let range = selectedByteRanges.first, selectedByteRanges.count == 1 {
 			// single or empty selection
 			let offset = range.lowerBound.formatted(.number.grouping(.never))
 			if range.lowerBound == range.upperBound {
 				// no selection
-				extraInfo = length
-			} else if range.upperBound - range.lowerBound == 1 {
-				// single byte
-				extraInfo = "Byte \(offset) selected out of \(length)"
-			} else {
-				// multiple bytes
-				let count = (range.upperBound - range.lowerBound).formatted(.number.grouping(.never))
-				extraInfo = "\(count) bytes selected at offset \(offset) out of \(length)"
+				return length
 			}
-		} else {
-			// multiple selection
-			let totalCount = selectedByteRanges.reduce(into: UInt64.zero, { $0 += ($1.upperBound - $1.lowerBound) })
-				.formatted(.number.grouping(.never))
 
-			extraInfo = "\(totalCount) selected at multiple offsets out of \(length)"
+			if range.upperBound - range.lowerBound == 1 {
+				// single byte
+				return "Byte \(offset) selected out of \(length)"
+			}
+
+			// multiple selected bytes
+			let count = (range.upperBound - range.lowerBound).formatted(.number.grouping(.never))
+			return "\(count) bytes selected at offset \(offset) out of \(length)"
 		}
 
-		return HexView(data: type.data(), selection: $selectedByteRanges)
-			.extraInfo(extraInfo)
+		// multiple selection
+		let totalCount = selectedByteRanges.reduce(into: UInt64.zero, { $0 += ($1.upperBound - $1.lowerBound) })
+			.formatted(.number.grouping(.never))
+
+		return "\(totalCount) selected at multiple offsets out of \(length)"
 	}
+
+	private var hexBody: some View {
+		HexView(data: type.data(), selection: $selectedByteRanges)
+			.extraInfo(hexBodyExtraInfo)
+	}
+	#endif
 
 	private var textBody: some View {
 		let data = type.data()
@@ -148,6 +162,7 @@ struct ContentsScreen: View {
 	}
 
 	private var formatPicker: some View {
+		#if os(macOS)
 		Picker("View As…", selection: $viewAsText) {
 			Label("View as text", systemImage: "textformat")
 				.tag(true)
@@ -158,6 +173,9 @@ struct ContentsScreen: View {
 		}
 		.pickerStyle(.segmented)
 		.labelsHidden()
+		#else
+		EmptyView()
+		#endif
 	}
 
 	private var moreButton: some View {
@@ -321,8 +339,9 @@ extension Pasteboard.Type_ {
 	}
 }
 
+#if os(macOS)
 struct HexView: NSViewRepresentable {
-	class Coordinator: HFRepresenter, ObservableObject {
+	class Coordinator: HFRepresenter {
 		let selectionBinding: Binding<Set<Range<UInt64>>>
 		var isUpdating = false
 
@@ -345,19 +364,20 @@ struct HexView: NSViewRepresentable {
 			guard isUpdating == false else {
 				return
 			}
-			if bits.contains(.contentValue) || bits.contains(.selectedRanges) {
-				// update the selection binding
-				if let controller = self.controller() {
-					let ranges = controller.selectedContentsRanges.compactMap { rangeWrapper -> Range<UInt64>? in
-						guard let hf = (rangeWrapper as? HFRangeWrapper)?.hfRange() else {
-							return nil
-						}
-						return hf.location ..< (hf.location + hf.length)
+			guard bits.contains(.contentValue) || bits.contains(.selectedRanges) else {
+				return
+			}
+			// update the selection binding
+			if let controller = self.controller() {
+				let ranges = controller.selectedContentsRanges.compactMap { rangeWrapper -> Range<UInt64>? in
+					guard let hf = (rangeWrapper as? HFRangeWrapper)?.hfRange() else {
+						return nil
 					}
-					selectionBinding.wrappedValue = Set(ranges)
-				} else {
-					selectionBinding.wrappedValue = Set()
+					return hf.location ..< (hf.location + hf.length)
 				}
+				selectionBinding.wrappedValue = Set(ranges)
+			} else {
+				selectionBinding.wrappedValue = Set()
 			}
 		}
 	}
@@ -384,3 +404,4 @@ struct HexView: NSViewRepresentable {
 		nsView.data = data
 	}
 }
+#endif
