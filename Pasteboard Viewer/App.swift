@@ -12,6 +12,8 @@ struct AppMain: App {
 	@State var hostingWindow: NSWindow? // swiftlint:disable:this swiftui_state_private
 	#endif
 
+	@AppStorage("viewAsText") var viewAsText = true
+
 	init() {
 		setUpConfig()
 
@@ -46,6 +48,13 @@ struct AppMain: App {
 				CommandGroup(after: .windowSize) {
 					Defaults.Toggle("Stay on Top", key: .stayOnTop)
 						.keyboardShortcut("t", modifiers: [.control, .command])
+				}
+				CommandGroup(after: .toolbar) {
+					Toggle("View as Text", isOn: $viewAsText)
+						.keyboardShortcut("1", modifiers: .command)
+
+					Toggle("View as Hex", isOn: .init(get: { !viewAsText }, set: { viewAsText = !$0 }))
+						.keyboardShortcut("2", modifiers: .command)
 				}
 				#endif
 				CommandGroup(replacing: .help) {

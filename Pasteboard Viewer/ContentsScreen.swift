@@ -4,7 +4,7 @@ import HexFiend
 
 struct ContentsScreen: View {
 	@EnvironmentObject private var pasteboardObservable: XPasteboard.Observable
-	@State private var viewAsText = true
+	@AppStorage("viewAsText") private var viewAsText = true
 	@State private var selectedByteRanges = Set<Range<UInt64>>()
 
 	let type: Pasteboard.Type_
