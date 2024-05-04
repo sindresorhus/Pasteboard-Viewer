@@ -63,6 +63,8 @@ struct MainScreen: View {
 		Group {
 			if let selectedType {
 				ContentsScreen(type: selectedType)
+					.id(selectedType.id)
+					.id(pasteboardObservable.info?.id)
 					.environmentObject(pasteboardObservable)
 			} else {
 				#if os(macOS)
