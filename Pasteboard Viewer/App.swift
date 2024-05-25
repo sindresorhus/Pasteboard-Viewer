@@ -2,7 +2,7 @@ import SwiftUI
 import TipKit
 
 /**
-TODO iOS 18:
+TODO iOS 19:
 - Native visionOS version.
 */
 
@@ -57,9 +57,11 @@ struct AppMain: App {
 					Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
 					Divider()
 					RateOnAppStoreButton(appStoreID: "1499215709")
-					// TODO: Doesn't work. (macOS 14.3)
+					// TODO: Doesn't work. (macOS 15.0)
 //					ShareAppButton(appStoreID: "1499215709")
 					MoreAppsButton()
+					Divider()
+					AppLicensesButton()
 					Divider()
 					SendFeedbackButton()
 				}

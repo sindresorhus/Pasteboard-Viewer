@@ -165,6 +165,32 @@ struct RateOnAppStoreButton: View {
 }
 
 
+struct AppLicensesButton: View {
+	var body: some View {
+		NavigationLink {
+			AppLicensesScreen()
+		} label: {
+			Label("Licenses", systemImage: "scroll")
+		}
+	}
+}
+
+private struct AppLicensesScreen: View {
+	var body: some View {
+		ScrollView {
+			let url = Bundle.main.url(forResource: "Licenses", withExtension: "txt")!
+			Text(try! String(contentsOf: url))
+		}
+		.contentMargins(16, for: .scrollContent)
+		.navigationTitle("Licenses")
+		.toolbarTitleDisplayMode(.inline)
+		#if os(macOS)
+		.frame(minWidth: 300, minHeight: 300)
+		#endif
+	}
+}
+
+
 private func escapeQuery(_ query: String) -> String {
 	// From RFC 3986
 	let generalDelimiters = ":#[]@"
@@ -304,7 +330,7 @@ struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatab
 	@ViewBuilder let label: () -> Label
 
 	var body: some View {
-		Picker(selection: selection.caseIndex) { // swiftlint:disable:this multiline_arguments
+		Picker(selection: selection.caseIndex) {
 			ForEach(Array(Enum.allCases).indexed(), id: \.0) { index, element in
 				content(element)
 					.tag(index)
@@ -1153,7 +1179,7 @@ extension XPasteboard.PasteboardType {
 }
 
 
-extension URL: ExpressibleByStringLiteral {
+extension URL: @retroactive ExpressibleByStringLiteral {
 	/**
 	Example:
 
@@ -1245,7 +1271,7 @@ struct URLIcon: View {
 		Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
 			.renderingMode(.original)
 			.resizable()
-			.aspectRatio(contentMode: .fit)
+			.scaledToFit()
 			.accessibilityHidden(true)
 	}
 }
@@ -1627,7 +1653,7 @@ extension XImage {
 
 
 extension Data {
-	var toString: String? { String(data: self, encoding: .utf8) }
+	var toString: String? { String(data: self, encoding: .utf8) } // swiftlint:disable:this non_optional_string_data_conversion
 }
 
 

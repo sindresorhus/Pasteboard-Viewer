@@ -172,6 +172,8 @@ struct MainScreen: View {
 			RateOnAppStoreButton(appStoreID: "1499215709")
 			ShareAppButton(appStoreID: "1499215709")
 			MoreAppsButton()
+			Divider()
+			AppLicensesButton()
 		}
 	}
 	#endif
