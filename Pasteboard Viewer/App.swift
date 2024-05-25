@@ -2,7 +2,7 @@ import SwiftUI
 import TipKit
 
 /**
-TODO iOS 18:
+TODO iOS 19:
 - Native visionOS version.
 */
 
@@ -39,31 +39,32 @@ struct AppMain: App {
 				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 13.4)
 				#endif
 		}
-			.commands {
-				CommandGroup(replacing: .newItem) {
-					// TODO: Do this. I need to get the selected pasteboard.
+		.commands {
+			CommandGroup(replacing: .newItem) {
+				// TODO: Do this. I need to get the selected pasteboard.
 //					ClearPasteboardButton()
-				}
-				#if os(macOS)
-				CommandGroup(after: .windowSize) {
-					Defaults.Toggle("Stay on Top", key: .stayOnTop)
-						.keyboardShortcut("t", modifiers: [.control, .command])
-				}
-				CommandGroup(after: .toolbar) {
-					formatPicker
-				}
-				#endif
-				CommandGroup(replacing: .help) {
-					Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
-					Divider()
-					RateOnAppStoreButton(appStoreID: "1499215709")
-					// TODO: Doesn't work. (macOS 14.3)
-//					ShareAppButton(appStoreID: "1499215709")
-					MoreAppsButton()
-					Divider()
-					SendFeedbackButton()
-				}
 			}
+			#if os(macOS)
+			CommandGroup(after: .windowSize) {
+				Defaults.Toggle("Stay on Top", key: .stayOnTop)
+					.keyboardShortcut("t", modifiers: [.control, .command])
+			}
+			CommandGroup(after: .toolbar) {
+				formatPicker
+			}
+			#endif
+			CommandGroup(replacing: .help) {
+				Link("Website", destination: "https://sindresorhus.com/pasteboard-viewer")
+				Divider()
+				RateOnAppStoreButton(appStoreID: "1499215709")
+				ShareAppButton(appStoreID: "1499215709")
+				MoreAppsButton()
+				Divider()
+				AppLicensesButton()
+				Divider()
+				SendFeedbackButton()
+			}
+		}
 	}
 
 	private func didLaunch() {}
@@ -76,6 +77,8 @@ struct AppMain: App {
 		)
 
 		SSApp.initSentry("https://ded0fb3f6f7e4f0ca1f06048bfc26d57@o844094.ingest.sentry.io/6255818")
+
+		SSApp.setUpExternalEventListeners()
 
 		Defaults[.launchCount].increment()
 

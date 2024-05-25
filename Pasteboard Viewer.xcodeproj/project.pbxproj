@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,6 +12,7 @@
 		E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E31C294123FBE2FA00DF3442 /* Defaults */; };
 		E31C294423FBE32200DF3442 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C294323FBE32200DF3442 /* Constants.swift */; };
 		E32033FE2B887F8D00935A23 /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32033FD2B887F8D00935A23 /* Intents.swift */; };
+		E3214F082C0216AD009B4614 /* Licenses.txt in Resources */ = {isa = PBXBuildFile; fileRef = E3214F072C0216AD009B4614 /* Licenses.txt */; };
 		E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */; };
 		E353C8B4256BE26800D08A09 /* WelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E353C8B3256BE26800D08A09 /* WelcomeScreen.swift */; };
 		E35B30CD2BE535E3007C4E89 /* SwiftUIIntrospect-Static in Frameworks */ = {isa = PBXBuildFile; platformFilters = (macos, ); productRef = E35B30CC2BE535E3007C4E89 /* SwiftUIIntrospect-Static */; };
@@ -27,6 +28,7 @@
 /* Begin PBXFileReference section */
 		E31C294323FBE32200DF3442 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E32033FD2B887F8D00935A23 /* Intents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intents.swift; sourceTree = "<group>"; };
+		E3214F072C0216AD009B4614 /* Licenses.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Licenses.txt; sourceTree = "<group>"; };
 		E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = InternetAccessPolicy.json; sourceTree = "<group>"; };
 		E353C8B3256BE26800D08A09 /* WelcomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeScreen.swift; sourceTree = "<group>"; };
 		E3A7F1D923F7DAD400CDF428 /* Pasteboard Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pasteboard Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,6 +115,7 @@
 				E3A7F1E823F7DAD700CDF428 /* Info.plist */,
 				E3A7F1E923F7DAD700CDF428 /* Pasteboard_Viewer.entitlements */,
 				E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */,
+				E3214F072C0216AD009B4614 /* Licenses.txt */,
 			);
 			name = Other;
 			sourceTree = "<group>";
@@ -152,7 +155,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1130;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1620;
 				ORGANIZATIONNAME = "Sindre Sorhus";
 				TargetAttributes = {
 					E3A7F1D823F7DAD400CDF428 = {
@@ -161,7 +164,6 @@
 				};
 			};
 			buildConfigurationList = E3A7F1D423F7DAD400CDF428 /* Build configuration list for PBXProject "Pasteboard Viewer" */;
-			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -172,10 +174,11 @@
 			packageReferences = (
 				E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */,
 				E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
-				9320401E2AB7D4E00080B53F /* XCRemoteSwiftPackageReference "SwiftLint" */,
 				E3065AA62B81118700475AB5 /* XCRemoteSwiftPackageReference "swift-collections" */,
 				55FABE882BE1801E004E66FD /* XCRemoteSwiftPackageReference "HexFiend" */,
+				E31B5F7B2C63ADB700C4807E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
+			preferredProjectObjectVersion = 77;
 			productRefGroup = E3A7F1DA23F7DAD400CDF428 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -190,6 +193,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E3214F082C0216AD009B4614 /* Licenses.txt in Resources */,
 				E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */,
 				E3A7F1E423F7DAD700CDF428 /* Preview Assets.xcassets in Resources */,
 				E3A7F1E123F7DAD700CDF428 /* Assets.xcassets in Resources */,
@@ -278,15 +282,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
-				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				XROS_DEPLOYMENT_TARGET = 1.0;
+				XROS_DEPLOYMENT_TARGET = 2.2;
 			};
 			name = Debug;
 		};
@@ -338,14 +342,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
-				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				XROS_DEPLOYMENT_TARGET = 1.0;
+				XROS_DEPLOYMENT_TARGET = 2.2;
 			};
 			name = Release;
 		};
@@ -467,10 +471,18 @@
 		};
 		E3065AA62B81118700475AB5 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-collections.git";
+			repositoryURL = "https://github.com/apple/swift-collections";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.1.0;
+			};
+		};
+		E31B5F7B2C63ADB700C4807E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.56.1;
 			};
 		};
 		E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */ = {
@@ -478,15 +490,15 @@
 			repositoryURL = "https://github.com/sindresorhus/Defaults";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 8.2.0;
+				minimumVersion = 9.0.1;
 			};
 		};
 		E3494C14297D175B00983648 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
 			requirement = {
-				kind = upToNextMinorVersion;
-				minimumVersion = 1.1.3;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

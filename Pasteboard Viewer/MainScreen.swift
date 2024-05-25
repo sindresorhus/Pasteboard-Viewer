@@ -2,61 +2,69 @@ import SwiftUI
 import StoreKit
 import TipKit
 
+#if os(macOS)
+import SwiftUIIntrospect
+#endif
+
 struct MainScreen: View {
 	@Environment(\.requestReview) private var requestReview
 	@Environment(\.horizontalSizeClass) private var horizontalSizeClass
 	@StateObject private var pasteboardObservable = XPasteboard.Observable(.general)
 	@Default(.stayOnTop) private var stayOnTop
+	@State private var columnVisibility = NavigationSplitViewVisibility.all
 	@State private var selectedPasteboard = Pasteboard.general
 	@State private var selectedType: Pasteboard.Type_?
 
 	var body: some View {
-		Group {
-			#if os(macOS)
-			// TODO: Set the sidebar to not be collapsible when SwiftUI supports that.
-			// TODO: We intentionally do not use `NavigationSplitView` as there is no way to prevent it from collapsing. (macOS 14.2)
-			NavigationView {
-				sidebar
-				mainContent
-			}
-			#else
-			NavigationSplitView {
-				sidebar
-			} detail: {
-				mainContent
-			}
-			.navigationSplitViewStyle(.balanced)
-			#endif
+		NavigationSplitView(columnVisibility: $columnVisibility) {
+			sidebar
+		} detail: {
+			mainContent
 		}
-			#if os(macOS)
-			.preventSidebarCollapse()
-			// TODO: Change the `minWidth` to `320` when the sidebar can be made unhidable.
-			.frame(minWidth: 240, minHeight: 120)
-			.onChange(of: selectedPasteboard) {
-				pasteboardObservable.pasteboard = selectedPasteboard.xPasteboard
-				selectedType = selectedPasteboard.firstType
+		.navigationSplitViewStyle(.balanced)
+		#if os(macOS)
+		// Prevent sidebar from collapsing.
+		.introspect(.navigationSplitView, on: .macOS(.v15)) { splitview in
+			guard let delegate = splitview.delegate as? NSSplitViewController else {
+				return
 			}
-			.windowTabbingMode(.disallowed)
-			.windowLevel(stayOnTop ? .floating : .normal)
-			#else
-			.task(id: pasteboardObservable.info) {
-				selectedType = nil
-			}
-			#endif
-			.task(id: pasteboardObservable.info) {
-				guard horizontalSizeClass != .compact else {
-					return
-				}
 
-				selectedType = selectedPasteboard.items.first?.types.first { $0.utType == .utf8PlainText } ?? selectedPasteboard.firstType
+			delegate.splitViewItems.first?.canCollapse = false
+			delegate.splitViewItems.first?.canCollapseFromWindowResize = false
+		}
+		// TODO: Change the `minWidth` to `320` when the sidebar can be made unhidable.
+		.frame(minWidth: 240, minHeight: 120)
+		.onChange(of: selectedPasteboard) {
+			pasteboardObservable.pasteboard = selectedPasteboard.xPasteboard
+			selectedType = selectedPasteboard.firstType
+		}
+		// Prevent sidebar from collapsing.
+		.onChange(of: columnVisibility, initial: true) {
+			Task { @MainActor in
+				columnVisibility = .all
 			}
-			.task {
-				guard Defaults[.launchCount] == 3 else {
-					return
-				}
+		}
+		.windowTabbingMode(.disallowed)
+		.windowLevel(stayOnTop ? .floating : .normal)
+		#else
+		.task(id: pasteboardObservable.info) {
+			selectedType = nil
+		}
+		#endif
+		.task(id: pasteboardObservable.info) {
+			guard horizontalSizeClass != .compact else {
+				return
+			}
 
-				requestReview()
+			selectedType = selectedPasteboard.items.first?.types.first { $0.utType == .utf8PlainText } ?? selectedPasteboard.firstType
+		}
+		.task {
+			guard Defaults[.launchCount] == 3 else {
+				return
 			}
+
+			requestReview()
+		}
 	}
 
 	private var mainContent: some View {
@@ -94,41 +102,41 @@ struct MainScreen: View {
 				}
 			}
 		}
-			#if os(macOS)
-			.padding(.bottom, 1) // The safe area inset does not work without this. (macOS 12.2)
-			.safeAreaInset(edge: .bottom, alignment: .leading) {
-				sourceAppView
-			}
-			// TODO: Use this when SwiftUI is able to persist the sidebar size.
-			// .frame(minWidth: 180, idealWidth: 200)
-			.frame(minWidth: 200)
-			.toolbar {
-				ToolbarItem(placement: .primaryAction) {
-					EnumPicker("Pasteboard", selection: $selectedPasteboard) {
-						Text($0.xPasteboard.presentableName)
-					}
+		#if os(macOS)
+		.padding(.bottom, 1) // The safe area inset does not work without this. (macOS 12.2)
+		.safeAreaInset(edge: .bottom, alignment: .leading) {
+			sourceAppView
+		}
+		// TODO: Use this when SwiftUI is able to persist the sidebar size.
+		// .frame(minWidth: 180, idealWidth: 200)
+		.frame(minWidth: 200)
+		.toolbar {
+			ToolbarItem(placement: .primaryAction) {
+				EnumPicker("Pasteboard", selection: $selectedPasteboard) {
+					Text($0.xPasteboard.presentableName)
 				}
 			}
-			.toolbar(removing: .sidebarToggle)
-			#else
-			.navigationTitle("Pasteboard")
-			.toolbar {
-				moreButton
-			}
-			.overlay {
-				if selectedPasteboard.items.isEmpty {
-					VStack(spacing: 16) {
-						Text("No Items")
-							.emptyStateTextStyle()
-						if SSApp.isFirstLaunch {
-							Button("Add Example Data") {
-								UIPasteboard.general.url = URL("https://sindresorhus.com/pasteboard-viewer")
-							}
+		}
+		.toolbar(removing: .sidebarToggle)
+		#else
+		.navigationTitle("Pasteboard")
+		.toolbar {
+			moreButton
+		}
+		.overlay {
+			if selectedPasteboard.items.isEmpty {
+				VStack(spacing: 16) {
+					Text("No Items")
+						.emptyStateTextStyle()
+					if SSApp.isFirstLaunch {
+						Button("Add Example Data") {
+							UIPasteboard.general.url = URL("https://sindresorhus.com/pasteboard-viewer")
 						}
 					}
 				}
 			}
-			#endif
+		}
+		#endif
 	}
 
 	#if os(macOS)
@@ -154,8 +162,8 @@ struct MainScreen: View {
 						.foregroundStyle(.secondary)
 				}
 			}
-				.padding()
-				.respectInactive()
+			.padding()
+			.respectInactive()
 		}
 	}
 	#endif
@@ -172,6 +180,8 @@ struct MainScreen: View {
 			RateOnAppStoreButton(appStoreID: "1499215709")
 			ShareAppButton(appStoreID: "1499215709")
 			MoreAppsButton()
+			Divider()
+			AppLicensesButton()
 		}
 	}
 	#endif

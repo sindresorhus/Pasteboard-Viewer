@@ -71,7 +71,8 @@ struct ContentsScreen: View {
 		}
 
 		// Multiple selection.
-		let totalCount = selectedByteRanges.reduce(into: UInt64.zero, { $0 += ($1.upperBound - $1.lowerBound) })
+		let totalCount = selectedByteRanges
+			.reduce(into: UInt64.zero) { $0 += ($1.upperBound - $1.lowerBound) }
 			.formatted(.number.grouping(.never))
 
 		return "\(totalCount) selected at multiple offsets out of \(length)"
@@ -126,7 +127,7 @@ struct ContentsScreen: View {
 			{
 				Image(xImage: image)
 					.resizable()
-					.aspectRatio(contentMode: .fit)
+					.scaledToFit()
 					.draggable(Image(xImage: image))
 					.frame(maxWidth: image.size.width, maxHeight: image.size.height)
 					.extraInfo("\(sizeString) — \(image.pixelSize.formatted)")
@@ -204,7 +205,7 @@ struct ContentsScreen: View {
 							return
 						}
 
-						url.openUrl()
+						url.openURL()
 						#endif
 					}
 				}

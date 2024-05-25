@@ -8,7 +8,6 @@ import Collections
 
 #if os(macOS)
 import Quartz
-import SwiftUIIntrospect
 #endif
 
 #if os(macOS)
@@ -39,6 +38,15 @@ final class ObjectAssociation<T> {
 }
 
 
+extension AnyCancellable {
+	private static var foreverStore = Set<AnyCancellable>()
+
+	func storeForever() {
+		store(in: &Self.foreverStore)
+	}
+}
+
+
 enum SSApp {
 	static let idString = Bundle.main.bundleIdentifier!
 	static let name = Bundle.main.object(forInfoDictionaryKey: kCFBundleNameKey as String) as! String
@@ -60,20 +68,20 @@ enum SSApp {
 
 
 extension SSApp {
+	static let debugInfo =
+		"""
+		\(name) \(versionWithBuild) - \(idString)
+		macOS \(System.osVersion)
+		\(System.hardwareModel)
+		"""
+
 	/**
 	- Note: Call this lazily only when actually needed as otherwise it won't get the live info.
 	*/
 	static func appFeedbackUrl() -> URL {
-		let metadata =
-			"""
-			\(name) \(versionWithBuild) - \(idString)
-			macOS \(System.osVersion)
-			\(System.hardwareModel)
-			"""
-
 		let query: [String: String] = [
 			"product": name,
-			"metadata": metadata
+			"metadata": debugInfo
 		]
 
 		return URL(string: "https://sindresorhus.com/feedback")!.addingDictionaryAsQuery(query)
@@ -97,6 +105,30 @@ extension SSApp {
 }
 
 
+extension SSApp {
+	static func setUpExternalEventListeners() {
+		#if os(macOS)
+		DistributedNotificationCenter.default.publisher(for: .init("\(SSApp.idString):openSendFeedback"))
+			.sink { _ in
+				DispatchQueue.main.async {
+					SSApp.appFeedbackUrl().open()
+				}
+			}
+			.storeForever()
+
+		DistributedNotificationCenter.default.publisher(for: .init("\(SSApp.idString):copyDebugInfo"))
+			.sink { _ in
+				DispatchQueue.main.async {
+					NSPasteboard.general.prepareForNewContents()
+					NSPasteboard.general.setString(SSApp.debugInfo, forType: .string)
+				}
+			}
+			.storeForever()
+		#endif
+	}
+}
+
+
 extension URL {
 	func open() {
 		#if os(macOS)
@@ -112,10 +144,10 @@ extension URL {
 extension String {
 	/*
 	```
-	"https://sindresorhus.com".openUrl()
+	"https://sindresorhus.com".openURL()
 	```
 	*/
-	func openUrl() {
+	func openURL() {
 		URL(string: self)?.open()
 	}
 }
@@ -161,6 +193,32 @@ struct RateOnAppStoreButton: View {
 			systemImage: "star",
 			destination: URL(string: "itms-apps://apps.apple.com/app/id\(appStoreID)?action=write-review")!
 		)
+	}
+}
+
+
+struct AppLicensesButton: View {
+	var body: some View {
+		NavigationLink {
+			AppLicensesScreen()
+		} label: {
+			Label("Licenses", systemImage: "scroll")
+		}
+	}
+}
+
+private struct AppLicensesScreen: View {
+	var body: some View {
+		ScrollView {
+			let url = Bundle.main.url(forResource: "Licenses", withExtension: "txt")!
+			Text(try! String(contentsOf: url, encoding: .utf8))
+		}
+		.contentMargins(16, for: .scrollContent)
+		.navigationTitle("Licenses")
+		.toolbarTitleDisplayMode(.inline)
+		#if os(macOS)
+		.frame(minWidth: 300, minHeight: 300)
+		#endif
 	}
 }
 
@@ -284,7 +342,7 @@ extension Binding where Value: CaseIterable & Equatable {
 			Text(
 				Priority.allCases[priorityIndex].rawValue.capitalized
 			)
-				.tag(priorityIndex)
+			.tag(priorityIndex)
 		}
 	}
 	```
@@ -304,7 +362,7 @@ struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatab
 	@ViewBuilder let label: () -> Label
 
 	var body: some View {
-		Picker(selection: selection.caseIndex) { // swiftlint:disable:this multiline_arguments
+		Picker(selection: selection.caseIndex) {
 			ForEach(Array(Enum.allCases).indexed(), id: \.0) { index, element in
 				content(element)
 					.tag(index)
@@ -1153,7 +1211,7 @@ extension XPasteboard.PasteboardType {
 }
 
 
-extension URL: ExpressibleByStringLiteral {
+extension URL: @retroactive ExpressibleByStringLiteral {
 	/**
 	Example:
 
@@ -1245,7 +1303,7 @@ struct URLIcon: View {
 		Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
 			.renderingMode(.original)
 			.resizable()
-			.aspectRatio(contentMode: .fit)
+			.scaledToFit()
 			.accessibilityHidden(true)
 	}
 }
@@ -1290,7 +1348,7 @@ extension NSAlert {
 			buttonTitles: buttonTitles,
 			defaultButtonIndex: defaultButtonIndex
 		)
-			.runModal(for: window)
+		.runModal(for: window)
 	}
 
 	/**
@@ -1627,7 +1685,7 @@ extension XImage {
 
 
 extension Data {
-	var toString: String? { String(data: self, encoding: .utf8) }
+	var toString: String? { String(data: self, encoding: .utf8) } // swiftlint:disable:this non_optional_string_data_conversion
 }
 
 
@@ -1754,20 +1812,6 @@ extension UTType {
 #if os(macOS)
 extension View {
 	/**
-	- Note: This only works on the old `NavigationView` and not `NavigationSplitView`.
-	*/
-	func preventSidebarCollapse() -> some View {
-		introspect(.navigationSplitView, on: .macOS(.v14)) {
-			($0.delegate as? NSSplitViewController)?.splitViewItems.first?.canCollapse = false
-		}
-	}
-}
-#endif
-
-
-#if os(macOS)
-extension View {
-	/**
 	Make the view respect window inactive state by lowering the opacity.
 	*/
 	func respectInactive() -> some View {
@@ -1776,10 +1820,10 @@ extension View {
 }
 
 private struct RespectInactiveViewModifier: ViewModifier {
-	@Environment(\.controlActiveState) private var controlActiveState
+	@Environment(\.appearsActive) private var appearsActive
 
 	func body(content: Content) -> some View {
-		content.opacity(controlActiveState == .inactive ? 0.5 : 1)
+		content.opacity(appearsActive ? 1 : 0.5)
 	}
 }
 #endif
