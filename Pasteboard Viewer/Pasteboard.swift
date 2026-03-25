@@ -147,5 +147,6 @@ extension XPasteboardItem {
 
 				return true
 			}
+			.moveToEnd(where: \.isDynamic)
 	}
 }

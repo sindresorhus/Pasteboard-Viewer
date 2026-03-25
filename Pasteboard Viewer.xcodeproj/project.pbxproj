@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 100;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -39,7 +39,6 @@
 		E3A7F1E023F7DAD700CDF428 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E3A7F1E323F7DAD700CDF428 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E3A7F1E823F7DAD700CDF428 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E3A7F1E923F7DAD700CDF428 /* Pasteboard_Viewer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pasteboard_Viewer.entitlements; sourceTree = "<group>"; };
 		E3A7F20E23F7E36000CDF428 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		E3A7F21123F8498F00CDF428 /* ContentsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentsScreen.swift; sourceTree = "<group>"; };
 		E3BB8DC523FBDBCE007A3849 /* Pasteboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pasteboard.swift; sourceTree = "<group>"; };
@@ -48,14 +47,12 @@
 /* Begin PBXFrameworksBuildPhase section */
 		E3A7F1D623F7DAD400CDF428 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				E3065AA82B81118700475AB5 /* Collections in Frameworks */,
 				E31C294223FBE2FA00DF3442 /* Defaults in Frameworks */,
 				55FABE8A2BE1801E004E66FD /* HexFiend in Frameworks */,
 				E35B30CD2BE535E3007C4E89 /* SwiftUIIntrospect-Static in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -116,7 +113,6 @@
 			children = (
 				E39ABD182E7407240064A372 /* AppIcon.icon */,
 				E3A7F1E823F7DAD700CDF428 /* Info.plist */,
-				E3A7F1E923F7DAD700CDF428 /* Pasteboard_Viewer.entitlements */,
 				E33868FF24AC782D0074DFF8 /* InternetAccessPolicy.json */,
 				E3214F072C0216AD009B4614 /* Licenses.txt */,
 			);
@@ -158,7 +154,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1130;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2640;
 				ORGANIZATIONNAME = "Sindre Sorhus";
 				TargetAttributes = {
 					E3A7F1D823F7DAD400CDF428 = {
@@ -182,7 +178,7 @@
 				55FABE882BE1801E004E66FD /* XCRemoteSwiftPackageReference "HexFiend" */,
 				E31B5F7B2C63ADB700C4807E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 100;
 			productRefGroup = E3A7F1DA23F7DAD400CDF428 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -195,7 +191,6 @@
 /* Begin PBXResourcesBuildPhase section */
 		E3A7F1D723F7DAD400CDF428 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				E3214F082C0216AD009B4614 /* Licenses.txt in Resources */,
 				E338690024AC782D0074DFF8 /* InternetAccessPolicy.json in Resources */,
@@ -203,14 +198,12 @@
 				E3A7F1E123F7DAD700CDF428 /* Assets.xcassets in Resources */,
 				E39ABD192E7407240064A372 /* AppIcon.icon in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E3A7F1D523F7DAD400CDF428 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				E3A7F20F23F7E36000CDF428 /* Utilities.swift in Sources */,
 				E3A7F21223F8498F00CDF428 /* ContentsScreen.swift in Sources */,
@@ -221,7 +214,6 @@
 				E31C294423FBE32200DF3442 /* Constants.swift in Sources */,
 				E353C8B4256BE26800D08A09 /* WelcomeScreen.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -233,7 +225,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		E3A7F1EA23F7DAD700CDF428 /* Debug */ = {
+		E3A7F1EA23F7DAD700CDF428 /* Debug configuration for PBXProject "Pasteboard Viewer" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -288,8 +280,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
-				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -297,11 +289,11 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				XROS_DEPLOYMENT_TARGET = 2.2;
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
-		E3A7F1EB23F7DAD700CDF428 /* Release */ = {
+		E3A7F1EB23F7DAD700CDF428 /* Release configuration for PBXProject "Pasteboard Viewer" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -350,23 +342,22 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
-				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				XROS_DEPLOYMENT_TARGET = 2.2;
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
 		};
-		E3A7F1ED23F7DAD700CDF428 /* Debug */ = {
+		E3A7F1ED23F7DAD700CDF428 /* Debug configuration for PBXNativeTarget "Pasteboard Viewer" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "Pasteboard Viewer/Pasteboard_Viewer.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -375,8 +366,17 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Pasteboard Viewer/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Pasteboard Viewer/Info.plist";
@@ -402,11 +402,10 @@
 			};
 			name = Debug;
 		};
-		E3A7F1EE23F7DAD700CDF428 /* Release */ = {
+		E3A7F1EE23F7DAD700CDF428 /* Release configuration for PBXNativeTarget "Pasteboard Viewer" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "Pasteboard Viewer/Pasteboard_Viewer.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -415,8 +414,17 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Pasteboard Viewer/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Pasteboard Viewer/Info.plist";
@@ -448,19 +456,17 @@
 		E3A7F1D423F7DAD400CDF428 /* Build configuration list for PBXProject "Pasteboard Viewer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E3A7F1EA23F7DAD700CDF428 /* Debug */,
-				E3A7F1EB23F7DAD700CDF428 /* Release */,
+				E3A7F1EA23F7DAD700CDF428 /* Debug configuration for PBXProject "Pasteboard Viewer" */,
+				E3A7F1EB23F7DAD700CDF428 /* Release configuration for PBXProject "Pasteboard Viewer" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		E3A7F1EC23F7DAD700CDF428 /* Build configuration list for PBXNativeTarget "Pasteboard Viewer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E3A7F1ED23F7DAD700CDF428 /* Debug */,
-				E3A7F1EE23F7DAD700CDF428 /* Release */,
+				E3A7F1ED23F7DAD700CDF428 /* Debug configuration for PBXNativeTarget "Pasteboard Viewer" */,
+				E3A7F1EE23F7DAD700CDF428 /* Release configuration for PBXNativeTarget "Pasteboard Viewer" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */

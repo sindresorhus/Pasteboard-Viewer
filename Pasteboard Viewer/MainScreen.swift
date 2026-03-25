@@ -9,7 +9,7 @@ import SwiftUIIntrospect
 struct MainScreen: View {
 	@Environment(\.requestReview) private var requestReview
 	@Environment(\.horizontalSizeClass) private var horizontalSizeClass
-	@StateObject private var pasteboardObservable = XPasteboard.Observable(.general)
+	@State private var pasteboardObservable = XPasteboard.Observable(.general)
 	@Default(.stayOnTop) private var stayOnTop
 	@State private var columnVisibility = NavigationSplitViewVisibility.all
 	@State private var selectedPasteboard = Pasteboard.general
@@ -75,7 +75,7 @@ struct MainScreen: View {
 				ContentsScreen(type: selectedType)
 					.id(selectedType.id)
 					.id(pasteboardObservable.info?.id)
-					.environmentObject(pasteboardObservable)
+					.environment(pasteboardObservable)
 			} else {
 				#if os(macOS)
 				Text("No Pasteboard Items")
@@ -120,6 +120,15 @@ struct MainScreen: View {
 			}
 		}
 		.toolbar(removing: .sidebarToggle)
+		.overlay {
+			if isPasteboardAccessDenied {
+				ContentUnavailableView {
+					Label("Clipboard Access Denied", systemImage: "clipboard")
+				} description: {
+					Text("Allow clipboard access in System Settings → Privacy & Security → Paste from Other Apps.")
+				}
+			}
+		}
 		#else
 		.navigationTitle("Pasteboard")
 		.toolbar {
@@ -142,6 +151,10 @@ struct MainScreen: View {
 	}
 
 	#if os(macOS)
+	private var isPasteboardAccessDenied: Bool {
+		NSPasteboard.general.accessBehavior == .alwaysDeny
+	}
+
 	@ViewBuilder
 	private var sourceAppView: some View {
 		if
@@ -212,7 +225,7 @@ private struct SidebarItemView: View {
 			Divider()
 			if type.xType == .fileURL {
 				#if os(macOS)
-				Button("Show in Finder") {
+				Button("Show in Finder", systemImage: "finder") {
 					type.string()?.toURL?.showInFinder()
 				}
 				#endif
@@ -225,27 +238,14 @@ private struct SidebarItemView: View {
 			if let dynamicTitle = type.decodedDynamicTitleIfAvailable {
 				Text(dynamicTitle)
 				Text(type.title)
-					.foregroundStyle(.secondary)
-					#if os(macOS)
-					.font(.system(size: 10))
-					.respectInactive()
-					#else
-					.font(.subheadline)
-					#endif
+					.sidebarSubtitleStyle()
 					.lineLimit(1)
 			} else {
 				Text(type.title)
-				// TODO: DRY.
 				#if !os(macOS)
 				if let description = type.utType?.localizedDescription {
 					Text(description.capitalizedFirstCharacter)
-						.foregroundStyle(.secondary)
-						#if os(macOS)
-						.font(.system(size: 10))
-						.respectInactive()
-						#else
-						.font(.subheadline)
-						#endif
+						.sidebarSubtitleStyle()
 				}
 				#endif
 			}
@@ -276,11 +276,23 @@ private struct AvoidPasteboardPromptTip: Tip {
 }
 #endif
 
+extension View {
+	fileprivate func sidebarSubtitleStyle() -> some View {
+		foregroundStyle(.secondary)
+		#if os(macOS)
+			.font(.system(size: 10))
+			.respectInactive()
+		#else
+			.font(.subheadline)
+		#endif
+	}
+}
+
 struct ClearPasteboardButton: View {
 	@FocusedBinding(\.selectedPasteboard) private var selectedPasteboard
 
 	// Only needed to get the iOS menu item to update disabled state.
-	@StateObject private var pasteboardObservable = XPasteboard.Observable(.general)
+	@State private var pasteboardObservable = XPasteboard.Observable(.general)
 
 	var body: some View {
 		Button(
@@ -292,6 +304,7 @@ struct ClearPasteboardButton: View {
 			pasteboard.xPasteboard.clear()
 		}
 		.disabled((selectedPasteboard ?? .general).xPasteboard.isEmpty)
+		.observing(pasteboardObservable.info)
 		.keyboardShortcut("c", modifiers: [.option, .command])
 		.onChange(of: selectedPasteboard, initial: true) { _, newValue in
 			if let newValue {

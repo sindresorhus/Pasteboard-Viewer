@@ -110,7 +110,7 @@ extension SSApp {
 		#if os(macOS)
 		DistributedNotificationCenter.default.publisher(for: .init("\(SSApp.idString):openSendFeedback"))
 			.sink { _ in
-				DispatchQueue.main.async {
+				Task { @MainActor in
 					SSApp.appFeedbackUrl().open()
 				}
 			}
@@ -118,7 +118,7 @@ extension SSApp {
 
 		DistributedNotificationCenter.default.publisher(for: .init("\(SSApp.idString):copyDebugInfo"))
 			.sink { _ in
-				DispatchQueue.main.async {
+				Task { @MainActor in
 					NSPasteboard.general.prepareForNewContents()
 					NSPasteboard.general.setString(SSApp.debugInfo, forType: .string)
 				}
@@ -1019,16 +1019,17 @@ extension XPasteboard {
 	An observable object that publishes updates when the given pasteboard changes.
 	*/
 	@MainActor
-	final class Observable: ObservableObject {
-		private var cancellable: AnyCancellable?
+	@Observable
+	final class Observable {
+		@ObservationIgnored private var cancellable: AnyCancellable?
 
-		@Published var pasteboard: XPasteboard {
+		var pasteboard: XPasteboard {
 			didSet {
 				start()
 			}
 		}
 
-		@Published var info: ContentsInfo?
+		var info: ContentsInfo?
 
 		private func start() {
 			cancellable = pasteboard.publisher.sink { [weak self] in
@@ -1083,7 +1084,7 @@ struct QuickLookPreview: NSViewRepresentable {
 			coordinator.parent.shouldCleanUp,
 			let url = coordinator.parent.previewItem.previewItemURL
 		{
-			DispatchQueue.global(qos: .utility).async {
+			Task.detached(priority: .utility) {
 				try? FileManager.default.removeItem(at: url)
 			}
 		}
@@ -1126,7 +1127,7 @@ struct QuickLookPreview: UIViewControllerRepresentable {
 			coordinator.parent.shouldCleanUp,
 			let url = coordinator.parent.previewItem.previewItemURL
 		{
-			DispatchQueue.global(qos: .utility).async {
+			Task.detached(priority: .utility) {
 				try? FileManager.default.removeItem(at: url)
 			}
 		}
@@ -1510,6 +1511,19 @@ extension View {
 
 extension View {
 	/**
+	Establishes an observation dependency so the view re-evaluates when the given value changes.
+
+	Useful when a view needs to react to `@Observable` property changes that aren't directly read in the body.
+	*/
+	func observing(_ value: some Any) -> some View {
+		let _ = value
+		return self
+	}
+}
+
+
+extension View {
+	/**
 	For empty states in the UI. For example, no items in a list, no search results, etc.
 	*/
 	func emptyStateTextStyle() -> some View {
@@ -1546,6 +1560,17 @@ extension Data {
 		}
 
 		return [UInt8](self)[0..<6] == [0x7B, 0x5C, 0x72, 0x74, 0x66, 0x31]
+	}
+
+	/**
+	Attempts to decode the data as an RTF/RTFD attributed string.
+	*/
+	func rtfAttributedString(contentType: UTType?) -> NSAttributedString? {
+		guard isRtf || contentType?.conforms(to: .rtfd) == true || contentType?.conforms(to: .flatRTFD) == true else {
+			return nil
+		}
+
+		return NSAttributedString(rtf: self, documentAttributes: nil) ?? NSAttributedString(rtfd: self, documentAttributes: nil)
 	}
 }
 
@@ -1954,7 +1979,6 @@ struct UIPasteboardItem: Hashable {
 extension XPasteboard {
 	private static var xItemsCache: (changeCount: Int, items: [XPasteboardItem])?
 
-	// TODO: Sort `.dyn` last on macOS too.
 	var xItems: [XPasteboardItem] {
 		#if os(macOS)
 		pasteboardItems ?? []

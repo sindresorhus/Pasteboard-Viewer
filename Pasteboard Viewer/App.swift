@@ -2,7 +2,7 @@ import SwiftUI
 import TipKit
 
 /**
-TODO iOS 19:
+TODO iOS 28:
 - Native visionOS version.
 */
 
@@ -17,7 +17,7 @@ struct AppMain: App {
 	init() {
 		setUpConfig()
 
-		DispatchQueue.main.async { [self] in
+		Task { @MainActor [self] in
 			didLaunch()
 		}
 
@@ -31,9 +31,7 @@ struct AppMain: App {
 			MainScreen()
 				#if os(macOS)
 				.task {
-					DispatchQueue.main.async {
-						showWelcomeScreenIfNeeded()
-					}
+					showWelcomeScreenIfNeeded()
 				}
 				.bindHostingWindow($hostingWindow)
 				.eraseToAnyView() // This fixes an issue where the window size is not persisted. (macOS 13.4)
@@ -115,14 +113,21 @@ private struct PasteboardMenuView: View {
 	
 	var body: some View {
 		if selectedPasteboard != nil {
-			Section("Switch") {
+			Picker(
+				"Switch",
+				selection: .init(
+					get: { selectedPasteboard ?? .general
+					},
+					set: { selectedPasteboard = $0 }
+				)
+			) {
 				ForEach(Pasteboard.allCases, id: \.self) { pasteboard in
-					Button(pasteboard.xPasteboard.presentableName, systemImage: icon(for: pasteboard)) {
-						selectedPasteboard = pasteboard
-					}
-					.keyboardShortcut(key(for: pasteboard), modifiers: [.control])
+					Label(pasteboard.xPasteboard.presentableName, systemImage: icon(for: pasteboard))
+						.tag(pasteboard)
+						.keyboardShortcut(key(for: pasteboard), modifiers: [.control])
 				}
 			}
+			.pickerStyle(.inline)
 			Section {
 				ClearPasteboardButton()
 			}

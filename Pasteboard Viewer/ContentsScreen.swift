@@ -6,7 +6,7 @@ import HexFiend
 #endif
 
 struct ContentsScreen: View {
-	@EnvironmentObject private var pasteboardObservable: XPasteboard.Observable
+	@Environment(XPasteboard.Observable.self) private var pasteboardObservable
 	@Default(.viewAsText) private var viewAsText
 	@State private var selectedByteRanges = Set<Range<UInt64>>()
 
@@ -140,8 +140,7 @@ struct ContentsScreen: View {
 					.extraInfo("\(sizeString) — \(image.pixelSize.formatted)")
 			} else if
 				let data,
-				data.isRtf || contentType?.conforms(to: .rtfd) == true || contentType?.conforms(to: .flatRTFD) == true, // The below initializer is too lenient with non-RTF data.
-				let attributedString = NSAttributedString(rtf: data, documentAttributes: nil) ?? NSAttributedString(rtfd: data, documentAttributes: nil)
+				let attributedString = data.rtfAttributedString(contentType: contentType)
 			{
 				ScrollableAttributedTextView(
 					attributedText: attributedString,
@@ -214,12 +213,8 @@ struct ContentsScreen: View {
 				let plainTextForSharing: String? = {
 					let (utType, data) = type.forSharing
 
-					// TODO: DRY.
-					if
-						data.isRtf || utType.conforms(to: .rtfd) || utType.conforms(to: .flatRTFD), // The below initializer is too lenient with non-RTF data.
-						let attributedString = NSAttributedString(rtf: data, documentAttributes: nil) ?? NSAttributedString(rtfd: data, documentAttributes: nil)
-					{
-						return attributedString.string
+					if let plainText = data.rtfAttributedString(contentType: utType)?.string {
+						return plainText
 					}
 
 					return data.toString ?? data.decodeStringWithUnknownEncoding()
@@ -286,7 +281,7 @@ private struct PasteboardItemShareButton: View {
 			}
 		}
 		.onDisappear {
-			DispatchQueue.global(qos: .utility).async {
+			Task.detached(priority: .utility) {
 				try? FileManager.default.removeItem(at: .temporaryDirectory.appending(component: "PasteboardItemShareButton", directoryHint: .isDirectory))
 			}
 		}
