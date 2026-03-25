@@ -116,8 +116,7 @@ private struct PasteboardMenuView: View {
 			Picker(
 				"Switch",
 				selection: .init(
-					get: { selectedPasteboard ?? .general
-					},
+					get: { selectedPasteboard ?? .general },
 					set: { selectedPasteboard = $0 }
 				)
 			) {

@@ -1301,17 +1301,35 @@ struct URLIcon: View {
 	let url: URL
 
 	var body: some View {
-		Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
+		Image(nsImage: NSWorkspace.shared.icon(forFile: url.path(percentEncoded: false)))
 			.renderingMode(.original)
 			.resizable()
 			.scaledToFit()
 			.accessibilityHidden(true)
 	}
 }
-#endif
+
+extension URL {
+	/**
+	The icon for the app at this URL, sized for use in menus.
+	*/
+	var appIcon: NSImage {
+		let icon = NSWorkspace.shared.icon(forFile: path(percentEncoded: false))
+		let copy = icon.copy() as? NSImage ?? icon
+		copy.size = CGSize(width: 16, height: 16)
+		return copy
+	}
+}
 
 
-#if os(macOS)
+extension NSApplication {
+	/**
+	The key window, or the main window as a fallback.
+	*/
+	var activeWindow: NSWindow? { keyWindow ?? mainWindow }
+}
+
+
 extension NSWorkspace {
 	/**
 	Get an app name from an app URL.

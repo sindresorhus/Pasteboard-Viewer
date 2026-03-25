@@ -377,7 +377,7 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Pasteboard Viewer/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Pasteboard;
@@ -425,7 +425,7 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Pasteboard Viewer/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Pasteboard;
@@ -493,7 +493,7 @@
 			repositoryURL = "https://github.com/apple/swift-collections";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.0;
+				minimumVersion = 1.4.1;
 			};
 		};
 		E31B5F7B2C63ADB700C4807E /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
@@ -501,7 +501,7 @@
 			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.56.1;
+				minimumVersion = 0.63.2;
 			};
 		};
 		E31C294023FBE2FA00DF3442 /* XCRemoteSwiftPackageReference "Defaults" */ = {
@@ -517,7 +517,7 @@
 			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.3.0;
+				minimumVersion = 26.0.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
