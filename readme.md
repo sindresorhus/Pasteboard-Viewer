@@ -29,10 +29,11 @@ Tip: Right-click (macOS) or long-tap (non-macOS) an item in the sidebar to copy 
 
 [![](https://sindresorhus.com/assets/download-on-app-store-badge.svg)](https://apps.apple.com/app/id1499215709)
 
-*Requires minimum macOS 15, iOS 18, or visionOS 2*
+*Requires minimum macOS 26, iOS 26, or visionOS 26*
 
 **Older versions (macOS)**
 
+- [2.11.0](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.11.0/Pasteboard.Viewer.2.11.0.-.macOS.15.zip) for macOS 15+
 - [2.8.0](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.8.0/Pasteboard.Viewer.2.8.0.-.macOS.14.zip) for macOS 14+
 - [2.5.1](https://github.com/sindresorhus/Pasteboard-Viewer/releases/download/v2.5.1/Pasteboard.Viewer.2.5.1.-.macOS.13.zip) for macOS 13+
 - [2.4.1](https://github.com/sindresorhus/meta/files/13539167/Pasteboard-Viewer-2.4.1-macOS-12.zip) for macOS 12+
@@ -43,7 +44,7 @@ Tip: Right-click (macOS) or long-tap (non-macOS) an item in the sidebar to copy 
 
 A special version for users that cannot access the App Store. It won't receive automatic updates. I will update it here once a year.
 
-[Download](https://www.dropbox.com/scl/fi/tgmv4vzibp11d7f6no5bf/Pasteboard-Viewer-2.10.0-1737192812.zip?rlkey=drv2la822kiz3os1cw4qa5e2o&raw=1) *(2.10.0 · macOS 15+)*
+[Download](https://www.dropbox.com/scl/fi/ofwrr7xwgkbh2gpyosdkl/Pasteboard-Viewer-2.12.0-1774843275.zip?rlkey=5xslv1f9me08bgwsn9yb2kpp8&raw=1) *(2.12.0 · macOS 26+)*
 
 ## Screenshot
 
